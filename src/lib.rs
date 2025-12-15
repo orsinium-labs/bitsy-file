@@ -1,0 +1,261 @@
+use std::fmt::Display;
+use std::io::Cursor;
+
+use radix_fmt::radix_36;
+use loe::{process, Config, TransformMode};
+
+pub mod colour;
+pub mod dialogue;
+pub mod ending;
+pub mod error;
+pub mod exit;
+pub mod game;
+pub mod image;
+pub mod item;
+pub mod mock;
+pub mod palette;
+pub mod position;
+pub mod room;
+pub mod sprite;
+pub mod text;
+pub mod tile;
+pub mod variable;
+pub mod test_omnibus;
+
+pub use colour::Colour;
+pub use dialogue::Dialogue;
+pub use ending::Ending;
+pub use error::Error;
+pub use exit::*;
+pub use game::*;
+pub use image::Image;
+pub use item::Item;
+pub use palette::Palette;
+pub use position::Position;
+pub use room::Room;
+pub use sprite::Sprite;
+pub use text::*;
+pub use tile::Tile;
+pub use variable::Variable;
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Instance {
+    position: Position,
+    id: String, // item / ending id
+}
+
+/// a Room can have many Exits in different positions,
+/// optionally with a transition and dialogue
+/// todo make a from_str() function for this
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ExitInstance {
+    position: Position,
+    exit: Exit,
+    transition: Option<Transition>,
+    dialogue_id: Option<String>,
+}
+
+pub trait AnimationFrames {
+    fn to_string(&self) -> String;
+}
+
+impl AnimationFrames for Vec<Image> {
+    fn to_string(&self) -> String {
+        let mut string = String::new();
+        let last_frame = self.len() - 1;
+
+        for (i, frame) in self.iter().enumerate() {
+            string.push_str(&frame.to_string());
+
+            if i < last_frame {
+                string.push_str(&"\n>\n".to_string());
+            }
+        }
+
+        string
+    }
+}
+
+/// this doesn't work inside ToBase36 for some reason
+fn to_base36(int: u64) -> String {
+    format!("{}", radix_36(int))
+}
+
+pub trait ToBase36 {
+    fn to_base36(&self) -> String;
+}
+
+impl ToBase36 for u64 {
+    fn to_base36(&self) -> String {
+        to_base36(*self)
+    }
+}
+
+/// e.g. `\nNAME DLG_0`
+fn optional_data_line<T: Display>(label: &str, item: Option<T>) -> String {
+    if item.is_some() {
+        format!("\n{} {}", label, item.unwrap())
+    } else {
+        "".to_string()
+    }
+}
+
+fn transform_line_endings(input: String, mode: TransformMode) -> String {
+    let mut input = Cursor::new(input);
+    let mut output = Cursor::new(Vec::new());
+
+    process(&mut input, &mut output, Config::default().transform(mode)).unwrap();
+    String::from_utf8(output.into_inner()).unwrap()
+}
+
+fn segments_from_str(str: &str) -> Vec<String> {
+    // this is pretty weird but a dialogue can just have an empty line followed by a name
+    // however, on entering two empty lines, dialogue will be wrapped in triple quotation marks
+    // so, handle this here
+    let string = str.replace("\n\nNAME", "\n\"\"\"\n\"\"\"\nNAME");
+
+    let mut output:Vec<String> = Vec::new();
+    // are we inside `"""\n...\n"""`? if so, ignore empty lines
+    let mut inside_escaped_block = false;
+    let mut current_segment : Vec<String> = Vec::new();
+
+    for line in string.lines() {
+        if line == "\"\"\"" {
+            inside_escaped_block = ! inside_escaped_block;
+        }
+
+        if line == "" && !inside_escaped_block {
+            output.push(current_segment.join("\n"));
+            current_segment = Vec::new();
+        } else {
+            current_segment.push(line.to_string());
+        }
+    }
+
+    output.push(current_segment.join("\n"));
+
+    output
+}
+
+/// tries to use an existing ID - if it is already in use, generate a new one
+/// then return the ID (either original or new)
+/// todo refactor (unnecessary clones etc.)
+fn try_id(ids: &Vec<String>, id: &String) -> String {
+    let id = id.clone();
+    let ids = ids.clone();
+    if is_id_available(&ids, &id) {
+        id
+    } else {
+        new_unique_id(ids)
+    }
+}
+
+fn is_id_available(ids: &Vec<String>, id: &String) -> bool {
+    ! ids.contains(id)
+}
+
+/// e.g. pass all tile IDs into this to get a new non-conflicting tile ID
+fn new_unique_id(ids: Vec<String>) -> String {
+    let mut new_id: u64 = 0;
+
+    while ids.contains(&new_id.to_base36()) {
+        new_id += 1;
+    }
+
+    to_base36(new_id)
+}
+
+pub trait Quote {
+    fn quote(&self) -> String;
+}
+
+impl Quote for String {
+    fn quote(&self) -> String {
+        format!("\"\"\"\n{}\n\"\"\"", self)
+    }
+}
+
+pub trait Unquote {
+    fn unquote(&self) -> String;
+}
+
+impl Unquote for String {
+    fn unquote(&self) -> String {
+        self.trim_matches('\"').trim_matches('\n').to_string()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{ToBase36, optional_data_line, mock, segments_from_str, Quote, Unquote, new_unique_id, try_id};
+
+    #[test]
+    fn to_base36() {
+        assert_eq!((37 as u64).to_base36(), "11");
+    }
+
+    #[test]
+    fn test_optional_data_line() {
+        let output = optional_data_line("NAME", mock::item().name);
+        assert_eq!(output, "\nNAME door");
+    }
+
+    #[test]
+    fn string_to_segments() {
+        let output = segments_from_str(include_str!("./test-resources/segments"));
+
+        let expected = vec![
+            "\"\"\"\nthe first segment is a long bit of text\n\n\nit contains empty lines\n\n\"\"\"".to_string(),
+            "this is a new segment\nthis is still the second segment\nblah\nblah".to_string(),
+            "DLG SEGMENT_3\n\"\"\"\nthis is a short \"long\" bit of text\n\"\"\"".to_string(),
+            "this is the last segment".to_string(),
+        ];
+
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn quote() {
+        let output = "this is a string.\nIt has 2 lines".to_string().quote();
+        let expected = "\"\"\"\nthis is a string.\nIt has 2 lines\n\"\"\"";
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn unquote() {
+        let output = "\"\"\"\nwho the fuck is scraeming \"LOG OFF\" at my house.\nshow yourself, coward.\ni will never log off\n\"\"\"".to_string().unquote();
+        let expected = "who the fuck is scraeming \"LOG OFF\" at my house.\nshow yourself, coward.\ni will never log off";
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_try_id() {
+        // does a conflict generate a new ID?
+        assert_eq!(
+            try_id(&vec!["0".to_string(), "1".to_string()], &"1".to_string()),
+            "2"
+        );
+        // with no conflict, does the ID remain the same?
+        assert_eq!(
+            try_id(&vec!["0".to_string(), "1".to_string()], &"3".to_string()),
+            "3"
+        );
+    }
+
+    #[test]
+    fn test_new_unique_id() {
+        // start
+        assert_eq!(new_unique_id(vec!["1".to_string(), "z".to_string()]), "0".to_string());
+        // middle
+        assert_eq!(new_unique_id(vec!["0".to_string(), "2".to_string()]), "1".to_string());
+        // end
+        assert_eq!(new_unique_id(vec!["0".to_string(), "1".to_string()]), "2".to_string());
+        // check sorting
+        assert_eq!(new_unique_id(vec!["1".to_string(), "0".to_string()]), "2".to_string());
+        // check deduplication
+        assert_eq!(
+            new_unique_id(vec!["0".to_string(), "0".to_string(), "1".to_string()]),
+            "2".to_string()
+        );
+    }
+}

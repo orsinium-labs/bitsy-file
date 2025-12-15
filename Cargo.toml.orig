@@ -1,0 +1,17 @@
+[package]
+name = "bitsy-parser"
+version = "0.710.1"
+authors = ["Max Bradbury <max@tinybird.info>"]
+edition = "2021"
+description = "A parser and utilities for working with Bitsy game data"
+readme = "README.md"
+repository = "https://tinybird.dev/max/bitsy-parser"
+license = "MIT"
+keywords = ["gamedev"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+data-encoding = "^2.3.1"
+radix_fmt = "^1.0.0"
+loe = "^0.2.0"
