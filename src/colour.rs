@@ -22,12 +22,10 @@ impl Colour {
 
     pub fn from_hex(hex: &str) -> Result<Colour, crate::Error> {
         let hex = hex.to_lowercase().trim_start_matches('#').to_string();
-        let rgb = data_encoding::HEXLOWER.decode(hex.as_bytes()).unwrap();
-
         Ok(Colour {
-            red: rgb[0],
-            green: rgb[1],
-            blue: rgb[2],
+            red: u8::from_str_radix(&hex[..2], 16).unwrap(),
+            green: u8::from_str_radix(&hex[2..4], 16).unwrap(),
+            blue: u8::from_str_radix(&hex[4..6], 16).unwrap(),
         })
     }
 }
