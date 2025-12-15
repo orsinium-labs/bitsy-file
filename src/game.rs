@@ -1,11 +1,5 @@
-use crate::{
-    new_unique_id, transform_line_endings, try_id, Dialogue, Ending, Error, Font, Image, Instance,
-    Item, Palette, Room, Sprite, TextDirection, Tile, Variable,
-};
-
-use loe::TransformMode;
-
 use crate::error::NotFound;
+use crate::*;
 use core::borrow::BorrowMut;
 use core::fmt;
 use std::collections::HashMap;
@@ -125,7 +119,6 @@ pub struct Game {
     pub endings: Vec<Ending>,
     pub variables: Vec<Variable>,
     pub font_data: Option<String>, // todo make this an actual struct for parsing
-    pub(crate) line_endings_crlf: bool, // otherwise lf (unix/mac)
 }
 
 impl Game {
@@ -133,15 +126,7 @@ impl Game {
         if string.trim() == "" {
             return Err(crate::error::NotFound::Anything);
         }
-
-        let mut warnings = Vec::new();
-
-        let line_endings_crlf = string.contains("\r\n");
-        let mut string = string;
-        if line_endings_crlf {
-            string = transform_line_endings(string, TransformMode::LF)
-        }
-
+        let string = string.replace("\r\n", "\n");
         let string = string.trim_start_matches('\n').to_string();
         let mut segments = crate::segments_from_str(&string);
 
@@ -190,6 +175,7 @@ impl Game {
         let mut items: Vec<Item> = Vec::new();
         let mut avatar_exists = false;
 
+        let mut warnings = Vec::new();
         for segment in segments {
             if segment.starts_with("# BITSY VERSION") {
                 let segment = segment.replace("# BITSY VERSION ", "");
@@ -294,7 +280,6 @@ impl Game {
                 endings,
                 variables,
                 font_data,
-                line_endings_crlf,
             },
             warnings,
         ))
@@ -612,21 +597,14 @@ impl ToString for Game {
             segments.push(self.font_data.to_owned().unwrap())
         }
 
-        transform_line_endings(
-            format!(
-                "{}{}{}{}{}\n\n{}\n\n",
-                &self.name,
-                &self.version_line(),
-                &self.room_format_line(),
-                &self.font_line(),
-                &self.text_direction_line(),
-                segments.join("\n\n"),
-            ),
-            if self.line_endings_crlf {
-                TransformMode::CRLF
-            } else {
-                TransformMode::LF
-            },
+        format!(
+            "{}{}{}{}{}\n\n{}\n\n",
+            &self.name,
+            &self.version_line(),
+            &self.room_format_line(),
+            &self.font_line(),
+            &self.text_direction_line(),
+            segments.join("\n\n"),
         )
     }
 }

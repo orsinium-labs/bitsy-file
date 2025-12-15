@@ -14,4 +14,3 @@ keywords = ["gamedev"]
 [dependencies]
 data-encoding = "^2.3.1"
 radix_fmt = "^1.0.0"
-loe = "^0.2.0"

@@ -1,7 +1,4 @@
 use core::fmt::Display;
-use std::io::Cursor;
-
-use loe::{process, Config, TransformMode};
 use radix_fmt::radix_36;
 
 pub mod colour;
@@ -98,14 +95,6 @@ fn optional_data_line<T: Display>(label: &str, item: Option<T>) -> String {
     } else {
         "".to_string()
     }
-}
-
-fn transform_line_endings(input: String, mode: TransformMode) -> String {
-    let mut input = Cursor::new(input);
-    let mut output = Cursor::new(Vec::new());
-
-    process(&mut input, &mut output, Config::default().transform(mode)).unwrap();
-    String::from_utf8(output.into_inner()).unwrap()
 }
 
 fn segments_from_str(str: &str) -> Vec<String> {

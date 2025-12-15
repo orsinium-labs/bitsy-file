@@ -856,6 +856,5 @@ pub fn game_default() -> Game {
             initial_value: "42".to_string(),
         }],
         font_data: None,
-        line_endings_crlf: false,
     }
 }
