@@ -24,7 +24,7 @@ impl Ending {
 
 impl fmt::Display for Ending {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f,"END {}\n{}", self.id, self.dialogue)
+        write!(f, "END {}\n{}", self.id, self.dialogue)
     }
 }
 
@@ -49,7 +49,8 @@ mod test {
             Ending {
                 id: "7".to_string(),
                 dialogue: "This is another long ending. So long, farewell, etc.".to_string()
-            }.to_string(),
+            }
+            .to_string(),
             "END 7\nThis is another long ending. So long, farewell, etc.".to_string()
         );
     }

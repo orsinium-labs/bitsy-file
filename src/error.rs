@@ -11,13 +11,17 @@ pub enum NotFound {
 
 impl fmt::Display for NotFound {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f,"Not found: {} data", match self {
-            NotFound::Anything => "game",
-            NotFound::Avatar   => "avatar",
-            NotFound::Room     => "room",
-            NotFound::Sprite   => "sprite",
-            NotFound::Tile     => "tile",
-        })
+        write!(
+            f,
+            "Not found: {} data",
+            match self {
+                NotFound::Anything => "game",
+                NotFound::Avatar => "avatar",
+                NotFound::Room => "room",
+                NotFound::Sprite => "sprite",
+                NotFound::Tile => "tile",
+            }
+        )
     }
 }
 
@@ -28,9 +32,7 @@ pub enum Error {
     Ending,
     Exit,
     Font,
-    Game {
-        missing: NotFound,
-    },
+    Game { missing: NotFound },
     Image,
     Item,
     Palette,

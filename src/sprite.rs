@@ -1,5 +1,5 @@
-use crate::{optional_data_line, AnimationFrames, Image, Position};
 use crate::image::animation_frames_from_str;
+use crate::{optional_data_line, AnimationFrames, Image, Position};
 
 use std::fmt;
 
@@ -44,14 +44,16 @@ impl Sprite {
         if self.items.is_empty() {
             "".to_string()
         } else {
-            let lines: Vec<String> = self.items.iter().map(
-                |item| format!("ITM {}", item)
-            ).collect();
+            let lines: Vec<String> = self
+                .items
+                .iter()
+                .map(|item| format!("ITM {}", item))
+                .collect();
 
             format!("\n{}", lines.join("\n"))
         }
     }
-    
+
     pub fn from_str(str: &str) -> Result<Sprite, crate::Error> {
         let mut lines: Vec<&str> = str.lines().collect();
 
@@ -100,9 +102,7 @@ impl Sprite {
 
         items.reverse();
 
-        let animation_frames = animation_frames_from_str(
-            &lines[1..].join("\n")
-        );
+        let animation_frames = animation_frames_from_str(&lines[1..].join("\n"));
 
         Ok(Sprite {
             id,
@@ -112,7 +112,7 @@ impl Sprite {
             room_id,
             position,
             colour_id,
-            items
+            items,
         })
     }
 }
@@ -147,6 +147,9 @@ mod test {
 
     #[test]
     fn sprite_to_string() {
-        assert_eq!(mock::sprite().to_string(), include_str!("test-resources/sprite"));
+        assert_eq!(
+            mock::sprite().to_string(),
+            include_str!("test-resources/sprite")
+        );
     }
 }

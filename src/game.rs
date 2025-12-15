@@ -1,17 +1,23 @@
-use crate::{Dialogue, Ending, Font, Image, Item, Palette, Room, Sprite, TextDirection, Tile, Variable, transform_line_endings, new_unique_id, try_id, Instance, Error};
+use crate::{
+    new_unique_id, transform_line_endings, try_id, Dialogue, Ending, Error, Font, Image, Instance,
+    Item, Palette, Room, Sprite, TextDirection, Tile, Variable,
+};
 
 use loe::TransformMode;
 
-use std::collections::HashMap;
-use std::borrow::BorrowMut;
-use std::fmt;
 use crate::error::NotFound;
+use std::borrow::BorrowMut;
+use std::collections::HashMap;
+use std::fmt;
 
 /// in very early versions of Bitsy, room tiles were defined as single alphanumeric characters -
 /// so there was a maximum of 36 unique tiles. later versions are comma-separated.
 /// RoomFormat is implemented here so we can save in the original format.
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
-pub enum RoomFormat {Contiguous, CommaSeparated}
+pub enum RoomFormat {
+    Contiguous,
+    CommaSeparated,
+}
 
 #[derive(Debug)]
 pub struct InvalidRoomFormat;
@@ -21,30 +27,38 @@ impl RoomFormat {
         match str {
             "0" => Ok(RoomFormat::Contiguous),
             "1" => Ok(RoomFormat::CommaSeparated),
-            _   => Err(InvalidRoomFormat),
+            _ => Err(InvalidRoomFormat),
         }
     }
 }
 
 impl fmt::Display for RoomFormat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match &self {
-            RoomFormat::Contiguous     => 0,
-            RoomFormat::CommaSeparated => 1,
-        })
+        write!(
+            f,
+            "{}",
+            match &self {
+                RoomFormat::Contiguous => 0,
+                RoomFormat::CommaSeparated => 1,
+            }
+        )
     }
 }
 
 /// in very early versions of Bitsy, a room was called a "set"
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
-pub enum RoomType {Room, Set}
+pub enum RoomType {
+    Room,
+    Set,
+}
 
 impl ToString for RoomType {
     fn to_string(&self) -> String {
         match &self {
-            RoomType::Set  => "SET",
+            RoomType::Set => "SET",
             RoomType::Room => "ROOM",
-        }.to_string()
+        }
+        .to_string()
     }
 }
 
@@ -63,11 +77,15 @@ pub enum VersionError {
 
 impl fmt::Display for VersionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            VersionError::MissingParts     => "Not enough parts supplied for version",
-            VersionError::ExtraneousParts  => "Too many parts supplied for version",
-            VersionError::MalformedInteger => "Version did not contain valid integers",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                VersionError::MissingParts => "Not enough parts supplied for version",
+                VersionError::ExtraneousParts => "Too many parts supplied for version",
+                VersionError::MalformedInteger => "Version did not contain valid integers",
+            }
+        )
     }
 }
 
@@ -133,8 +151,7 @@ impl Game {
         // it means that the first segment might not be the game name.
         // so, check if the first segment is actually the next segment of game data
         // to avoid setting the game name to "# BITSY VERSION 7.0" or something
-        if
-            segments[0].starts_with("\"\"\"") // multi-line game name
+        if segments[0].starts_with("\"\"\"") // multi-line game name
             ||
             (
                 ! segments[0].starts_with("# BITSY VERSION ")
@@ -185,9 +202,8 @@ impl Game {
                 }
             } else if segment.starts_with("! ROOM_FORMAT") {
                 let segment = segment.replace("! ROOM_FORMAT ", "");
-                room_format = Some(
-                    RoomFormat::from(&segment).unwrap_or(RoomFormat::CommaSeparated)
-                );
+                room_format =
+                    Some(RoomFormat::from(&segment).unwrap_or(RoomFormat::CommaSeparated));
             } else if segment.starts_with("DEFAULT_FONT") {
                 let segment = segment.replace("DEFAULT_FONT ", "");
 
@@ -254,41 +270,39 @@ impl Game {
             }
         }
 
-        if ! avatar_exists {
-            warnings.push(crate::Error::Game { missing: NotFound::Avatar });
+        if !avatar_exists {
+            warnings.push(crate::Error::Game {
+                missing: NotFound::Avatar,
+            });
         }
 
-        Ok(
-            (
-                Game {
-                    name,
-                    version,
-                    room_format,
-                    room_type,
-                    font,
-                    custom_font,
-                    text_direction,
-                    palettes,
-                    rooms,
-                    tiles,
-                    sprites,
-                    items,
-                    dialogues,
-                    endings,
-                    variables,
-                    font_data,
-                    line_endings_crlf,
-                },
-                warnings
-            )
-        )
+        Ok((
+            Game {
+                name,
+                version,
+                room_format,
+                room_type,
+                font,
+                custom_font,
+                text_direction,
+                palettes,
+                rooms,
+                tiles,
+                sprites,
+                items,
+                dialogues,
+                endings,
+                variables,
+                font_data,
+                line_endings_crlf,
+            },
+            warnings,
+        ))
     }
 
     /// todo refactor this into "get T by ID", taking a Vec<T> and an ID name?
     pub fn get_sprite_by_id(&self, id: String) -> Result<&Sprite, crate::error::NotFound> {
-        let index = self.sprites.iter().position(
-            |sprite| sprite.id == id
-        );
+        let index = self.sprites.iter().position(|sprite| sprite.id == id);
 
         match index {
             Some(index) => Ok(&self.sprites[index]),
@@ -297,9 +311,7 @@ impl Game {
     }
 
     pub fn get_tile_by_id(&self, id: String) -> Result<&Tile, crate::error::NotFound> {
-        let index = self.tiles.iter().position(
-            |tile| tile.id == id
-        );
+        let index = self.tiles.iter().position(|tile| tile.id == id);
 
         match index {
             Some(index) => Ok(&self.tiles[index]),
@@ -308,9 +320,7 @@ impl Game {
     }
 
     pub fn get_room_by_id(&self, id: String) -> Result<&Room, crate::error::NotFound> {
-        let index = self.rooms.iter().position(
-            |room| room.id == id
-        );
+        let index = self.rooms.iter().position(|room| room.id == id);
 
         match index {
             Some(index) => Ok(&self.rooms[index]),
@@ -341,8 +351,7 @@ impl Game {
         tile_ids.sort();
         tile_ids.dedup();
         // remove 0 as this isn't a real tile
-        let zero_index  = tile_ids.iter()
-            .position(|i| i == "0");
+        let zero_index = tile_ids.iter().position(|i| i == "0");
         if let Some(zero_index) = zero_index {
             tile_ids.remove(zero_index);
         }
@@ -354,16 +363,16 @@ impl Game {
     pub fn merge(&mut self, game: &Game) {
         // ignore title, version, room format, room type, font, text direction
 
-        let mut palette_id_changes:  HashMap<String, String> = HashMap::new();
-        let mut tile_id_changes:     HashMap<String, String> = HashMap::new();
+        let mut palette_id_changes: HashMap<String, String> = HashMap::new();
+        let mut tile_id_changes: HashMap<String, String> = HashMap::new();
         let mut dialogue_id_changes: HashMap<String, String> = HashMap::new();
-        let mut ending_id_changes:   HashMap<String, String> = HashMap::new();
-        let mut item_id_changes:     HashMap<String, String> = HashMap::new();
-        let mut room_id_changes:     HashMap<String, String> = HashMap::new();
-        let mut sprite_id_changes:   HashMap<String, String> = HashMap::new();
+        let mut ending_id_changes: HashMap<String, String> = HashMap::new();
+        let mut item_id_changes: HashMap<String, String> = HashMap::new();
+        let mut room_id_changes: HashMap<String, String> = HashMap::new();
+        let mut sprite_id_changes: HashMap<String, String> = HashMap::new();
 
         fn insert_if_different(map: &mut HashMap<String, String>, old: String, new: String) {
-            if old != new && ! map.contains_key(&old) {
+            if old != new && !map.contains_key(&old) {
                 map.insert(old, new);
             }
         }
@@ -377,7 +386,7 @@ impl Game {
             insert_if_different(
                 palette_id_changes.borrow_mut(),
                 palette.id.clone(),
-                self.add_palette(palette.clone())
+                self.add_palette(palette.clone()),
             );
         }
 
@@ -386,13 +395,13 @@ impl Game {
             insert_if_different(
                 tile_id_changes.borrow_mut(),
                 tile.id.clone(),
-                self.add_tile(tile.clone())
+                self.add_tile(tile.clone()),
             );
         }
 
         for variable in &game.variables {
             // don't change ID - just avoid duplicates
-            if ! self.variable_ids().contains(&variable.id) {
+            if !self.variable_ids().contains(&variable.id) {
                 self.add_variable(variable.clone());
             }
         }
@@ -410,10 +419,9 @@ impl Game {
 
             for (old, new) in &item_id_changes {
                 // todo is there a better way of doing this?
-                dialogue.contents = dialogue.contents.replace(
-                    &format!("item \"{}\"", old),
-                    &format!("item \"{}\"", new)
-                );
+                dialogue.contents = dialogue
+                    .contents
+                    .replace(&format!("item \"{}\"", old), &format!("item \"{}\"", new));
             }
 
             let old_id = dialogue.id.clone();
@@ -426,7 +434,7 @@ impl Game {
             insert_if_different(
                 ending_id_changes.borrow_mut(),
                 ending.id.clone(),
-                self.add_ending(ending.clone())
+                self.add_ending(ending.clone()),
             );
         }
 
@@ -478,45 +486,57 @@ impl Game {
 
             room.change_tile_ids(&tile_id_changes);
 
-            room.items = room.items.iter().map(|instance|
-                if item_id_changes.contains_key(&instance.id) {
-                    Instance {
-                        position: instance.position.clone(),
-                        id: item_id_changes[&instance.id].clone()
+            room.items = room
+                .items
+                .iter()
+                .map(|instance| {
+                    if item_id_changes.contains_key(&instance.id) {
+                        Instance {
+                            position: instance.position.clone(),
+                            id: item_id_changes[&instance.id].clone(),
+                        }
+                    } else {
+                        instance.clone()
                     }
-                } else {
-                    instance.clone()
-                }
-            ).collect();
+                })
+                .collect();
 
-            room.exits = room.exits.iter().map(|exit| {
-                let mut exit = exit.clone();
+            room.exits = room
+                .exits
+                .iter()
+                .map(|exit| {
+                    let mut exit = exit.clone();
 
-                let key = exit.exit.room_id.clone();
+                    let key = exit.exit.room_id.clone();
 
-                if let Some(change) = room_id_changes.get(&key) {
-                    exit.exit.room_id = change.clone();
-                }
-
-                if let Some(key) = exit.dialogue_id.clone() {
-                    if let Some(dialogue_change) = dialogue_id_changes.get(&key) {
-                        exit.dialogue_id = Some(dialogue_change.clone());
+                    if let Some(change) = room_id_changes.get(&key) {
+                        exit.exit.room_id = change.clone();
                     }
-                }
 
-                exit
-            }).collect();
+                    if let Some(key) = exit.dialogue_id.clone() {
+                        if let Some(dialogue_change) = dialogue_id_changes.get(&key) {
+                            exit.dialogue_id = Some(dialogue_change.clone());
+                        }
+                    }
 
-            room.endings = room.endings.iter().map(|ending| {
-                let mut ending = ending.clone();
-                let key = ending.id.clone();
+                    exit
+                })
+                .collect();
 
-                if let Some(change) = ending_id_changes.get(&key) {
-                    ending.id = change.clone();
-                }
+            room.endings = room
+                .endings
+                .iter()
+                .map(|ending| {
+                    let mut ending = ending.clone();
+                    let key = ending.id.clone();
 
-                ending
-            }).collect();
+                    if let Some(change) = ending_id_changes.get(&key) {
+                        ending.id = change.clone();
+                    }
+
+                    ending
+                })
+                .collect();
 
             self.add_room(room);
         }
@@ -602,7 +622,11 @@ impl ToString for Game {
                 &self.text_direction_line(),
                 segments.join("\n\n"),
             ),
-            if self.line_endings_crlf {TransformMode::CRLF} else {TransformMode::LF}
+            if self.line_endings_crlf {
+                TransformMode::CRLF
+            } else {
+                TransformMode::LF
+            },
         )
     }
 }
@@ -610,7 +634,10 @@ impl ToString for Game {
 impl Game {
     // todo dedupe
     pub fn palette_ids(&self) -> Vec<String> {
-        self.palettes.iter().map(|palette| palette.id.clone()).collect()
+        self.palettes
+            .iter()
+            .map(|palette| palette.id.clone())
+            .collect()
     }
 
     pub fn tile_ids(&self) -> Vec<String> {
@@ -618,7 +645,10 @@ impl Game {
     }
 
     pub fn sprite_ids(&self) -> Vec<String> {
-        self.sprites.iter().map(|sprite| sprite.id.clone()).collect()
+        self.sprites
+            .iter()
+            .map(|sprite| sprite.id.clone())
+            .collect()
     }
     pub fn room_ids(&self) -> Vec<String> {
         self.rooms.iter().map(|room| room.id.clone()).collect()
@@ -629,15 +659,24 @@ impl Game {
     }
 
     pub fn dialogue_ids(&self) -> Vec<String> {
-        self.dialogues.iter().map(|dialogue| dialogue.id.clone()).collect()
+        self.dialogues
+            .iter()
+            .map(|dialogue| dialogue.id.clone())
+            .collect()
     }
 
     pub fn ending_ids(&self) -> Vec<String> {
-        self.endings.iter().map(|ending| ending.id.clone()).collect()
+        self.endings
+            .iter()
+            .map(|ending| ending.id.clone())
+            .collect()
     }
 
     pub fn variable_ids(&self) -> Vec<String> {
-        self.variables.iter().map(|variable| variable.id.clone()).collect()
+        self.variables
+            .iter()
+            .map(|variable| variable.id.clone())
+            .collect()
     }
 
     // todo dedupe?
@@ -696,7 +735,9 @@ impl Game {
     }
 
     pub fn find_tile_with_animation(&self, animation: &[Image]) -> Option<&Tile> {
-        self.tiles.iter().find(|&tile| tile.animation_frames.as_slice() == animation)
+        self.tiles
+            .iter()
+            .find(|&tile| tile.animation_frames.as_slice() == animation)
     }
 
     /// adds a palette safely and returns the ID
@@ -797,10 +838,7 @@ impl Game {
             if tile == crate::mock::tile_background() {
                 tile_id_changes.insert(tile.id, "0".to_string());
             } else if tiles_temp.contains(&tile) {
-                tile_id_changes.insert(
-                    tile.id.clone(),
-                    self.get_tile_id(&tile).unwrap()
-                );
+                tile_id_changes.insert(tile.id.clone(), self.get_tile_id(&tile).unwrap());
             } else {
                 unique_tiles.push(tile);
             }
@@ -819,7 +857,8 @@ impl Game {
         if self.version.is_some() {
             format!(
                 "\n\n# BITSY VERSION {}.{}",
-                self.version.as_ref().unwrap().major, self.version.as_ref().unwrap().minor
+                self.version.as_ref().unwrap().major,
+                self.version.as_ref().unwrap().minor
             )
         } else {
             "".to_string()
@@ -828,7 +867,10 @@ impl Game {
 
     fn room_format_line(&self) -> String {
         if self.room_format.is_some() {
-            format!("\n\n! ROOM_FORMAT {}", self.room_format.unwrap().to_string())
+            format!(
+                "\n\n! ROOM_FORMAT {}",
+                self.room_format.unwrap().to_string()
+            )
         } else {
             "".to_string()
         }
@@ -837,8 +879,8 @@ impl Game {
     fn font_line(&self) -> String {
         match self.font {
             Font::AsciiSmall => "".to_string(),
-            Font::Custom     => format!("\n\nDEFAULT_FONT {}", self.custom_font.as_ref().unwrap()),
-            _                => format!("\n\nDEFAULT_FONT {}", self.font.to_string().unwrap()),
+            Font::Custom => format!("\n\nDEFAULT_FONT {}", self.custom_font.as_ref().unwrap()),
+            _ => format!("\n\nDEFAULT_FONT {}", self.font.to_string().unwrap()),
         }
     }
 
@@ -862,11 +904,12 @@ impl Game {
 
 #[cfg(test)]
 mod test {
-    use crate::{TextDirection, Font, Version, Game, Tile, Image, Palette, Colour};
+    use crate::{Colour, Font, Game, Image, Palette, TextDirection, Tile, Version};
 
     #[test]
     fn game_from_string() {
-        let (output, _) = Game::from(include_str!["test-resources/default.bitsy"].to_string()).unwrap();
+        let (output, _) =
+            Game::from(include_str!["test-resources/default.bitsy"].to_string()).unwrap();
         let expected = crate::mock::game_default();
 
         assert_eq!(output, expected);
@@ -881,7 +924,10 @@ mod test {
 
     #[test]
     fn tile_ids() {
-        assert_eq!(crate::mock::game_default().tile_ids(), vec!["a".to_string()]);
+        assert_eq!(
+            crate::mock::game_default().tile_ids(),
+            vec!["a".to_string()]
+        );
     }
 
     #[test]
@@ -929,7 +975,8 @@ mod test {
 
     #[test]
     fn arabic() {
-        let (game, _) = Game::from(include_str!("test-resources/arabic.bitsy").to_string()).unwrap();
+        let (game, _) =
+            Game::from(include_str!("test-resources/arabic.bitsy").to_string()).unwrap();
 
         assert_eq!(game.font, Font::Arabic);
         assert_eq!(game.text_direction, TextDirection::RightToLeft);
@@ -945,7 +992,9 @@ mod test {
     #[test]
     fn get_tiles_for_room() {
         assert_eq!(
-            crate::mock::game_default().get_tiles_for_room("0".to_string()).unwrap(),
+            crate::mock::game_default()
+                .get_tiles_for_room("0".to_string())
+                .unwrap(),
             vec![&crate::mock::tile_default()]
         )
     }
@@ -957,7 +1006,10 @@ mod test {
         game.add_item(crate::mock::item());
 
         let expected = vec![
-            "0".to_string(), "1".to_string(), "6".to_string(), "2".to_string()
+            "0".to_string(),
+            "1".to_string(),
+            "6".to_string(),
+            "2".to_string(),
         ];
 
         assert_eq!(game.item_ids(), expected);
@@ -971,14 +1023,24 @@ mod test {
 
         assert_eq!(game.room_ids(), vec!["0".to_string(), "1".to_string()]);
         assert_eq!(game.tile_ids(), vec!["a".to_string(), "1".to_string()]); // 0 is reserved
-        // duplicate avatar (SPR A) gets converted into a normal sprite
+                                                                             // duplicate avatar (SPR A) gets converted into a normal sprite
         assert_eq!(
             game.sprite_ids(),
-            vec!["A".to_string(), "a".to_string(), "0".to_string(), "1".to_string()]
+            vec![
+                "A".to_string(),
+                "a".to_string(),
+                "0".to_string(),
+                "1".to_string()
+            ]
         );
         assert_eq!(
             game.item_ids(),
-            vec!["0".to_string(), "1".to_string(), "2".to_string(), "3".to_string()]
+            vec![
+                "0".to_string(),
+                "1".to_string(),
+                "2".to_string(),
+                "3".to_string()
+            ]
         );
         assert_eq!(
             game.dialogue_ids(),
@@ -1007,7 +1069,10 @@ mod test {
         sprite.room_id = Some(room_id.clone());
         game_b.add_sprite(sprite);
         game_a.merge(&game_b);
-        assert_eq!(game_a.get_sprite_by_id("2".to_string()).unwrap().room_id, Some(room_id));
+        assert_eq!(
+            game_a.get_sprite_by_id("2".to_string()).unwrap().room_id,
+            Some(room_id)
+        );
     }
 
     #[test]
@@ -1025,17 +1090,12 @@ mod test {
             wall: Some(true),
             animation_frames: vec![Image {
                 pixels: vec![
-                    0,1,1,0,1,1,0,1,
-                    0,1,1,0,1,1,0,1,
-                    1,0,1,0,1,0,0,1,
-                    1,0,1,0,1,0,0,1,
-                    0,0,0,0,1,1,1,1,
-                    0,0,0,0,1,1,1,1,
-                    1,1,0,1,1,0,1,1,
-                    1,1,0,1,1,0,1,1,
-                ]
+                    0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0,
+                    1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1,
+                    1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1,
+                ],
             }],
-            colour_id: Some(1)
+            colour_id: Some(1),
         };
 
         let tile_b = Tile {
@@ -1044,17 +1104,12 @@ mod test {
             wall: Some(false),
             animation_frames: vec![Image {
                 pixels: vec![
-                    1,0,1,0,1,0,0,1,
-                    0,1,1,0,1,1,0,1,
-                    0,1,1,0,1,1,0,1,
-                    1,1,0,1,1,0,1,1,
-                    1,0,1,0,1,0,0,1,
-                    0,0,0,0,1,1,1,1,
-                    0,0,0,0,1,1,1,1,
-                    1,1,0,1,1,0,1,1,
-                ]
+                    1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+                    1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1,
+                ],
             }],
-            colour_id: None
+            colour_id: None,
         };
 
         game.add_tile(tile_a.clone());
@@ -1064,22 +1119,22 @@ mod test {
 
         game.dedupe_tiles();
 
-        assert_eq!(game.tiles, vec![crate::mock::tile_default(), tile_a, tile_b]);
+        assert_eq!(
+            game.tiles,
+            vec![crate::mock::tile_default(), tile_a, tile_b]
+        );
     }
 
     #[test]
     fn find_tile_with_animation() {
         let game = crate::mock::game_default();
-        let animation = vec![Image { pixels: vec![
-            1, 1, 1, 1, 1, 1, 1, 1,
-            1, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 1, 1, 0, 0, 1,
-            1, 0, 0, 1, 1, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 1,
-            1, 1, 1, 1, 1, 1, 1, 1,
-        ]}];
+        let animation = vec![Image {
+            pixels: vec![
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1,
+                1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1,
+                1, 1, 1, 1, 1, 1, 1, 1,
+            ],
+        }];
         let output = game.find_tile_with_animation(&animation);
         let expected = Some(&game.tiles[0]);
         assert_eq!(output, expected);
@@ -1087,8 +1142,14 @@ mod test {
 
     #[test]
     fn empty_game_data_throws_error() {
-        assert_eq!(Game::from("".to_string()        ).unwrap_err(), crate::error::NotFound::Anything);
-        assert_eq!(Game::from(" \n \r\n".to_string()).unwrap_err(), crate::error::NotFound::Anything);
+        assert_eq!(
+            Game::from("".to_string()).unwrap_err(),
+            crate::error::NotFound::Anything
+        );
+        assert_eq!(
+            Game::from(" \n \r\n".to_string()).unwrap_err(),
+            crate::error::NotFound::Anything
+        );
     }
 
     #[test]
@@ -1098,13 +1159,28 @@ mod test {
             id: "1".to_string(),
             name: Some("sadness".to_string()),
             colours: vec![
-                Colour { red: 133, green: 131, blue: 111 },
-                Colour { red: 105, green: 93,  blue: 104 },
-                Colour { red: 62,  green: 74,  blue: 76  },
-            ]
+                Colour {
+                    red: 133,
+                    green: 131,
+                    blue: 111,
+                },
+                Colour {
+                    red: 105,
+                    green: 93,
+                    blue: 104,
+                },
+                Colour {
+                    red: 62,
+                    green: 74,
+                    blue: 76,
+                },
+            ],
         };
         game.add_palette(new_palette.clone());
-        assert_eq!(game.get_palette("0").unwrap(), &crate::mock::game_default().palettes[0]);
+        assert_eq!(
+            game.get_palette("0").unwrap(),
+            &crate::mock::game_default().palettes[0]
+        );
         assert_eq!(game.get_palette("1").unwrap(), &new_palette);
         assert_eq!(game.get_palette("2"), None);
     }

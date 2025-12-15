@@ -18,32 +18,36 @@ pub enum Transition {
 impl Transition {
     pub fn from_str(str: &str) -> Result<Transition, crate::Error> {
         match str {
-            "fade_w"  => Ok(Transition::FadeToWhite),
-            "fade_b"  => Ok(Transition::FadeToBlack),
-            "wave"    => Ok(Transition::Wave),
-            "tunnel"  => Ok(Transition::Tunnel),
+            "fade_w" => Ok(Transition::FadeToWhite),
+            "fade_b" => Ok(Transition::FadeToBlack),
+            "wave" => Ok(Transition::Wave),
+            "tunnel" => Ok(Transition::Tunnel),
             "slide_u" => Ok(Transition::SlideUp),
             "slide_d" => Ok(Transition::SlideDown),
             "slide_l" => Ok(Transition::SlideLeft),
             "slide_r" => Ok(Transition::SlideRight),
-            _         => Err(crate::Error::Transition),
+            _ => Err(crate::Error::Transition),
         }
     }
 }
 
 impl fmt::Display for Transition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match &self {
-            Transition::FadeToWhite => " FX fade_w",
-            Transition::FadeToBlack => " FX fade_b",
-            Transition::Wave        => " FX wave",
-            Transition::Tunnel      => " FX tunnel",
-            Transition::SlideUp     => " FX slide_u",
-            Transition::SlideDown   => " FX slide_d",
-            Transition::SlideLeft   => " FX slide_l",
-            Transition::SlideRight  => " FX slide_r",
-            Transition::None        => "",
-        })
+        write!(
+            f,
+            "{}",
+            match &self {
+                Transition::FadeToWhite => " FX fade_w",
+                Transition::FadeToBlack => " FX fade_b",
+                Transition::Wave => " FX wave",
+                Transition::Tunnel => " FX tunnel",
+                Transition::SlideUp => " FX slide_u",
+                Transition::SlideDown => " FX slide_d",
+                Transition::SlideLeft => " FX slide_l",
+                Transition::SlideRight => " FX slide_r",
+                Transition::None => "",
+            }
+        )
     }
 }
 
@@ -75,7 +79,11 @@ impl Exit {
             Transition::None
         };
 
-        Ok(Exit { room_id, position, effect })
+        Ok(Exit {
+            room_id,
+            position,
+            effect,
+        })
     }
 }
 
@@ -93,7 +101,7 @@ impl fmt::Display for Exit {
 
 #[cfg(test)]
 mod test {
-    use crate::{Transition, Exit, Position};
+    use crate::{Exit, Position, Transition};
 
     #[test]
     fn exit_from_string() {
@@ -126,7 +134,8 @@ mod test {
                 room_id: "8".to_string(),
                 position: Position { x: 5, y: 6 },
                 effect: Transition::None
-            }.to_string(),
+            }
+            .to_string(),
             "8 5,6".to_string()
         );
     }
@@ -138,7 +147,8 @@ mod test {
                 room_id: "8".to_string(),
                 position: Position { x: 5, y: 6 },
                 effect: Transition::FadeToWhite
-            }.to_string(),
+            }
+            .to_string(),
             "8 5,6 FX fade_w".to_string()
         );
     }

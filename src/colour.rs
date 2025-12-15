@@ -24,7 +24,11 @@ impl Colour {
         let hex = hex.to_lowercase().trim_start_matches('#').to_string();
         let rgb = data_encoding::HEXLOWER.decode(hex.as_bytes()).unwrap();
 
-        Ok(Colour { red: rgb[0], green: rgb[1], blue: rgb[2], })
+        Ok(Colour {
+            red: rgb[0],
+            green: rgb[1],
+            blue: rgb[2],
+        })
     }
 }
 
@@ -42,13 +46,25 @@ mod test {
     fn colour_from_string() {
         assert_eq!(
             Colour::from("0,255,0").unwrap(),
-            Colour { red: 0, green: 255, blue: 0 }
+            Colour {
+                red: 0,
+                green: 255,
+                blue: 0
+            }
         );
     }
 
     #[test]
     fn colour_to_string() {
-        assert_eq!(Colour { red: 22, green: 33, blue: 44, }.to_string(), "22,33,44".to_string());
+        assert_eq!(
+            Colour {
+                red: 22,
+                green: 33,
+                blue: 44,
+            }
+            .to_string(),
+            "22,33,44".to_string()
+        );
     }
 
     #[test]
@@ -69,14 +85,22 @@ mod test {
     #[test]
     fn colour_from_hex() {
         let output = Colour::from_hex("#ffff00").unwrap();
-        let expected = Colour { red: 255, green: 255, blue: 0 };
+        let expected = Colour {
+            red: 255,
+            green: 255,
+            blue: 0,
+        };
         assert_eq!(output, expected);
     }
 
     #[test]
     fn colour_from_hex_upper() {
         let output = Colour::from_hex("#ABCDEF").unwrap();
-        let expected = Colour { red: 171, green: 205, blue: 239 };
+        let expected = Colour {
+            red: 171,
+            green: 205,
+            blue: 239,
+        };
         assert_eq!(output, expected);
     }
 }

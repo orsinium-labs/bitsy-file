@@ -1,5 +1,5 @@
-use crate::{optional_data_line, AnimationFrames, Image};
 use crate::image::animation_frames_from_str;
+use crate::{optional_data_line, AnimationFrames, Image};
 
 #[derive(Clone, Debug, Eq)]
 pub struct Tile {
@@ -15,10 +15,8 @@ pub struct Tile {
 impl PartialEq for Tile {
     fn eq(&self, other: &Self) -> bool {
         self.wall == other.wall
-        &&
-        self.animation_frames == other.animation_frames
-        &&
-        self.colour_id == other.colour_id
+            && self.animation_frames == other.animation_frames
+            && self.colour_id == other.colour_id
     }
 }
 
@@ -46,35 +44,51 @@ impl Tile {
     // todo refactor
 
     pub fn invert(&mut self) {
-        self.animation_frames = self.animation_frames.iter().map(|frame: &Image| {
-            let mut image = frame.clone();
-            image.invert();
-            image
-        }).collect()
+        self.animation_frames = self
+            .animation_frames
+            .iter()
+            .map(|frame: &Image| {
+                let mut image = frame.clone();
+                image.invert();
+                image
+            })
+            .collect()
     }
 
     pub fn flip(&mut self) {
-        self.animation_frames = self.animation_frames.iter().map(|frame: &Image| {
-            let mut image = frame.clone();
-            image.flip();
-            image
-        }).collect()
+        self.animation_frames = self
+            .animation_frames
+            .iter()
+            .map(|frame: &Image| {
+                let mut image = frame.clone();
+                image.flip();
+                image
+            })
+            .collect()
     }
 
     pub fn mirror(&mut self) {
-        self.animation_frames = self.animation_frames.iter().map(|frame: &Image| {
-            let mut image = frame.clone();
-            image.mirror();
-            image
-        }).collect()
+        self.animation_frames = self
+            .animation_frames
+            .iter()
+            .map(|frame: &Image| {
+                let mut image = frame.clone();
+                image.mirror();
+                image
+            })
+            .collect()
     }
 
     pub fn rotate(&mut self) {
-        self.animation_frames = self.animation_frames.iter().map(|frame: &Image| {
-            let mut image = frame.clone();
-            image.rotate();
-            image
-        }).collect()
+        self.animation_frames = self
+            .animation_frames
+            .iter()
+            .map(|frame: &Image| {
+                let mut image = frame.clone();
+                image.rotate();
+                image
+            })
+            .collect()
     }
 }
 
@@ -103,9 +117,7 @@ impl From<String> for Tile {
             }
         }
 
-        let animation_frames = animation_frames_from_str(
-            &lines[1..].join("\n")
-        );
+        let animation_frames = animation_frames_from_str(&lines[1..].join("\n"));
 
         Tile {
             id,
@@ -132,7 +144,7 @@ impl ToString for Tile {
 
 #[cfg(test)]
 mod test {
-    use crate::{Image, Tile, mock};
+    use crate::{mock, Image, Tile};
 
     #[test]
     fn tile_from_string() {
@@ -157,13 +169,10 @@ mod test {
             id: "7a".to_string(),
             name: Some("chequers".to_string()),
             wall: None,
-            animation_frames: vec![
-                mock::image::chequers_1(),
-                mock::image::chequers_2(),
-            ],
+            animation_frames: vec![mock::image::chequers_1(), mock::image::chequers_2()],
             colour_id: None,
         }
-            .to_string();
+        .to_string();
 
         let expected = include_str!("test-resources/tile-chequers").to_string();
 
@@ -172,7 +181,7 @@ mod test {
 
     #[test]
     fn partial_eq() {
-        let     tile_a = crate::mock::tile_default();
+        let tile_a = crate::mock::tile_default();
         let mut tile_b = crate::mock::tile_default();
         tile_b.id = "0".to_string();
         assert_eq!(tile_a, tile_b);

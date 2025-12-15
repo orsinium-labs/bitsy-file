@@ -69,7 +69,10 @@ impl Image {
             let line = &line[..dimension];
             for char in line.chars().into_iter() {
                 // todo push warning on integers other than 0/1
-                pixels.push(match char {'1' => 1, _ => 0});
+                pixels.push(match char {
+                    '1' => 1,
+                    _ => 0,
+                });
             }
         }
 
@@ -101,8 +104,7 @@ impl fmt::Display for Image {
 
 /// todo return Result<(Vec<Image>, Vec<crate::Error>), crate::Error>
 pub fn animation_frames_from_str(str: &str) -> Vec<Image> {
-    str
-        .split('>')
+    str.split('>')
         .collect::<Vec<&str>>()
         .iter()
         .map(|&frame| Image::from_str(frame).unwrap().0)
@@ -111,7 +113,7 @@ pub fn animation_frames_from_str(str: &str) -> Vec<Image> {
 
 #[cfg(test)]
 mod test {
-    use crate::image::{Image, animation_frames_from_str};
+    use crate::image::{animation_frames_from_str, Image};
     use crate::mock;
 
     #[test]
@@ -120,13 +122,8 @@ mod test {
 
         let expected = Image {
             pixels: vec![
-                1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 0, 0, 1, 1, 1, 1,
-                1, 0, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                 1, 1, 1, 1, 1, 1, 1, 1,
             ],
         };
@@ -143,9 +140,7 @@ mod test {
 
     #[test]
     fn test_animation_frames_from_string() {
-        let output = animation_frames_from_str(
-            include_str!("test-resources/animation_frames")
-        );
+        let output = animation_frames_from_str(include_str!("test-resources/animation_frames"));
 
         let expected = mock::image::animation_frames();
 
@@ -160,15 +155,10 @@ mod test {
 
         let expected = Image {
             pixels: vec![
-                1,1,1,1,1,1,1,1,
-                1,1,0,0,1,1,1,1,
-                1,0,1,1,1,1,1,1,
-                1,1,1,1,1,1,1,1,
-                1,1,1,1,1,1,1,1,
-                1,1,1,1,1,1,1,1,
-                1,1,1,1,1,1,1,1,
-                0,0,0,0,0,0,0,0,
-            ]
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                0, 0, 0, 0, 0, 0, 0, 0,
+            ],
         };
 
         assert_eq!(output, expected);
@@ -187,16 +177,13 @@ mod test {
         let mut image = crate::mock::image::asymmetrical();
         image.flip();
 
-        let flipped = Image { pixels: vec![
-            0,0,0,1,0,0,0,0,
-            0,0,1,0,0,0,0,0,
-            0,1,0,0,0,0,0,0,
-            1,0,0,0,0,0,0,0,
-            1,0,0,0,0,0,0,0,
-            0,1,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-        ]};
+        let flipped = Image {
+            pixels: vec![
+                0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+            ],
+        };
 
         assert_eq!(image, flipped);
     }
@@ -206,16 +193,13 @@ mod test {
         let mut image = crate::mock::image::asymmetrical();
         image.mirror();
 
-        let mirrored = Image { pixels: vec![
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,1,0,
-            0,0,0,0,0,0,0,1,
-            0,0,0,0,0,0,0,1,
-            0,0,0,0,0,0,1,0,
-            0,0,0,0,0,1,0,0,
-            0,0,0,0,1,0,0,0,
-        ]};
+        let mirrored = Image {
+            pixels: vec![
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0,
+            ],
+        };
 
         assert_eq!(image, mirrored);
     }
@@ -225,16 +209,13 @@ mod test {
         let mut image = crate::mock::image::asymmetrical();
         image.rotate();
 
-        let rotated = Image { pixels: vec![
-            0,0,0,1,1,0,0,0,
-            0,0,1,0,0,1,0,0,
-            0,1,0,0,0,0,0,0,
-            1,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-        ]};
+        let rotated = Image {
+            pixels: vec![
+                0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+            ],
+        };
 
         assert_eq!(image, rotated);
     }

@@ -46,7 +46,7 @@ mod test {
             id: "c".to_string(),
             initial_value: "57".to_string(),
         }
-            .to_string();
+        .to_string();
         let expected = "VAR c\n57".to_string();
         assert_eq!(output, expected);
     }

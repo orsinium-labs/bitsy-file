@@ -67,7 +67,8 @@ mod test {
 
     #[test]
     fn palette_from_string() {
-        let (output, _) = Palette::from_str("PAL 1\nNAME lamplight\n45,45,59\n66,60,39\n140,94,1").unwrap();
+        let (output, _) =
+            Palette::from_str("PAL 1\nNAME lamplight\n45,45,59\n66,60,39\n140,94,1").unwrap();
 
         let expected = Palette {
             id: "1".to_string(),
@@ -145,7 +146,8 @@ mod test {
                     blue: 128,
                 },
             ],
-        }.to_string();
+        }
+        .to_string();
 
         let expected = "PAL g\nNAME moss\n1,2,3\n255,254,253\n126,127,128";
         assert_eq!(output, expected);

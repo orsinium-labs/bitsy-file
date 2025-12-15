@@ -1,5 +1,5 @@
-use crate::{optional_data_line, AnimationFrames, Image};
 use crate::image::animation_frames_from_str;
+use crate::{optional_data_line, AnimationFrames, Image};
 use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -51,11 +51,15 @@ impl Item {
             }
         }
 
-        let animation_frames = animation_frames_from_str(
-            &lines[1..].join("\n")
-        );
+        let animation_frames = animation_frames_from_str(&lines[1..].join("\n"));
 
-        Ok(Item { id, name, animation_frames, dialogue_id, colour_id })
+        Ok(Item {
+            id,
+            name,
+            animation_frames,
+            dialogue_id,
+            colour_id,
+        })
     }
 }
 
@@ -75,7 +79,7 @@ impl fmt::Display for Item {
 
 #[cfg(test)]
 mod test {
-    use crate::{Item, mock};
+    use crate::{mock, Item};
 
     #[test]
     fn item_from_string() {

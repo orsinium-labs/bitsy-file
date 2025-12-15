@@ -1,8 +1,8 @@
 use std::fmt::Display;
 use std::io::Cursor;
 
-use radix_fmt::radix_36;
 use loe::{process, Config, TransformMode};
+use radix_fmt::radix_36;
 
 pub mod colour;
 pub mod dialogue;
@@ -17,10 +17,10 @@ pub mod palette;
 pub mod position;
 pub mod room;
 pub mod sprite;
+pub mod test_omnibus;
 pub mod text;
 pub mod tile;
 pub mod variable;
-pub mod test_omnibus;
 
 pub use colour::Colour;
 pub use dialogue::Dialogue;
@@ -114,14 +114,14 @@ fn segments_from_str(str: &str) -> Vec<String> {
     // so, handle this here
     let string = str.replace("\n\nNAME", "\n\"\"\"\n\"\"\"\nNAME");
 
-    let mut output:Vec<String> = Vec::new();
+    let mut output: Vec<String> = Vec::new();
     // are we inside `"""\n...\n"""`? if so, ignore empty lines
     let mut inside_escaped_block = false;
-    let mut current_segment : Vec<String> = Vec::new();
+    let mut current_segment: Vec<String> = Vec::new();
 
     for line in string.lines() {
         if line == "\"\"\"" {
-            inside_escaped_block = ! inside_escaped_block;
+            inside_escaped_block = !inside_escaped_block;
         }
 
         if line == "" && !inside_escaped_block {
@@ -151,7 +151,7 @@ fn try_id(ids: &Vec<String>, id: &String) -> String {
 }
 
 fn is_id_available(ids: &Vec<String>, id: &String) -> bool {
-    ! ids.contains(id)
+    !ids.contains(id)
 }
 
 /// e.g. pass all tile IDs into this to get a new non-conflicting tile ID
@@ -187,7 +187,10 @@ impl Unquote for String {
 
 #[cfg(test)]
 mod test {
-    use crate::{ToBase36, optional_data_line, mock, segments_from_str, Quote, Unquote, new_unique_id, try_id};
+    use crate::{
+        mock, new_unique_id, optional_data_line, segments_from_str, try_id, Quote, ToBase36,
+        Unquote,
+    };
 
     #[test]
     fn to_base36() {
@@ -245,13 +248,25 @@ mod test {
     #[test]
     fn test_new_unique_id() {
         // start
-        assert_eq!(new_unique_id(vec!["1".to_string(), "z".to_string()]), "0".to_string());
+        assert_eq!(
+            new_unique_id(vec!["1".to_string(), "z".to_string()]),
+            "0".to_string()
+        );
         // middle
-        assert_eq!(new_unique_id(vec!["0".to_string(), "2".to_string()]), "1".to_string());
+        assert_eq!(
+            new_unique_id(vec!["0".to_string(), "2".to_string()]),
+            "1".to_string()
+        );
         // end
-        assert_eq!(new_unique_id(vec!["0".to_string(), "1".to_string()]), "2".to_string());
+        assert_eq!(
+            new_unique_id(vec!["0".to_string(), "1".to_string()]),
+            "2".to_string()
+        );
         // check sorting
-        assert_eq!(new_unique_id(vec!["1".to_string(), "0".to_string()]), "2".to_string());
+        assert_eq!(
+            new_unique_id(vec!["1".to_string(), "0".to_string()]),
+            "2".to_string()
+        );
         // check deduplication
         assert_eq!(
             new_unique_id(vec!["0".to_string(), "0".to_string(), "1".to_string()]),

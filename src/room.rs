@@ -1,12 +1,5 @@
 use crate::{
-    optional_data_line,
-    Exit,
-    ExitInstance,
-    Instance,
-    Position,
-    RoomType,
-    RoomFormat,
-    Transition
+    optional_data_line, Exit, ExitInstance, Instance, Position, RoomFormat, RoomType, Transition,
 };
 
 use std::collections::HashMap;
@@ -78,7 +71,10 @@ impl From<String> for Room {
                 let position = item_position[1];
 
                 if let Ok(position) = Position::from_str(position) {
-                    items.push(Instance { position, id: item_id.to_string() });
+                    items.push(Instance {
+                        position,
+                        id: item_id.to_string(),
+                    });
                 }
             } else if last_line.starts_with("EXT") {
                 let last_line = last_line.replace("EXT ", "");
@@ -86,9 +82,7 @@ impl From<String> for Room {
                 let position = Position::from_str(parts[0]);
 
                 if let Ok(position) = position {
-                    let exit = Exit::from_str(
-                        &format!("{} {}", parts[1], parts[2])
-                    );
+                    let exit = Exit::from_str(&format!("{} {}", parts[1], parts[2]));
 
                     if let Ok(exit) = exit {
                         let mut transition = None;
@@ -104,7 +98,12 @@ impl From<String> for Room {
                             }
                         }
 
-                        exits.push(ExitInstance { position, exit, transition, dialogue_id });
+                        exits.push(ExitInstance {
+                            position,
+                            exit,
+                            transition,
+                            dialogue_id,
+                        });
                     }
                 }
             } else if last_line.starts_with("END") {
@@ -115,7 +114,10 @@ impl From<String> for Room {
                 let position = Position::from_str(position);
 
                 if let Ok(position) = position {
-                    endings.push(Instance { position, id: ending });
+                    endings.push(Instance {
+                        position,
+                        id: ending,
+                    });
                 }
             } else {
                 lines.push(last_line);
@@ -129,11 +131,11 @@ impl From<String> for Room {
 
         for line in lines.iter() {
             let comma_separated = line.contains(','); // old room format?
-            let mut line: Vec<&str> = line
-                .split(if comma_separated {","} else {""})
-                .collect();
+            let mut line: Vec<&str> = line.split(if comma_separated { "," } else { "" }).collect();
 
-            if ! comma_separated { line = line[1..].to_owned(); }
+            if !comma_separated {
+                line = line[1..].to_owned();
+            }
             let line = line[..dimension].to_owned();
 
             for tile_id in line {
@@ -198,8 +200,13 @@ impl Room {
                 match &instance.transition {
                     Some(transition) => transition,
                     None => &Transition::None,
-                }.to_string(),
-                if instance.dialogue_id.is_some() {" DLG "} else {""},
+                }
+                .to_string(),
+                if instance.dialogue_id.is_some() {
+                    " DLG "
+                } else {
+                    ""
+                },
                 instance.dialogue_id.as_ref().unwrap_or(&"".to_string()),
             ));
         }
@@ -228,15 +235,17 @@ impl Room {
 
     /// "changes" is a hash of old -> new tile IDs
     pub fn change_tile_ids(&mut self, changes: &HashMap<String, String>) {
-        self.tiles = self.tiles.iter().map(|tile_id|
-            changes.get(tile_id).unwrap_or(tile_id).clone()
-        ).collect();
+        self.tiles = self
+            .tiles
+            .iter()
+            .map(|tile_id| changes.get(tile_id).unwrap_or(tile_id).clone())
+            .collect();
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{Room, RoomType, RoomFormat};
+    use crate::{Room, RoomFormat, RoomType};
 
     #[test]
     fn room_from_string() {

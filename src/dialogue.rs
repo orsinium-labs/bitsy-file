@@ -52,14 +52,14 @@ mod test {
 
     #[test]
     fn dialogue_from_str() {
-        let output = Dialogue::from_str(
-            "DLG h\nhello\nNAME not a dialogue name\nNAME a dialogue name"
-        ).unwrap();
+        let output =
+            Dialogue::from_str("DLG h\nhello\nNAME not a dialogue name\nNAME a dialogue name")
+                .unwrap();
 
         let expected = Dialogue {
             id: "h".to_string(),
             contents: "hello\nNAME not a dialogue name".to_string(),
-            name: Some("a dialogue name".to_string())
+            name: Some("a dialogue name".to_string()),
         };
 
         assert_eq!(output, expected);
@@ -70,10 +70,12 @@ mod test {
         let output = Dialogue {
             id: "y".to_string(),
             contents: "This is a bit of dialogue,\nblah blah\nblah blah".to_string(),
-            name: Some("a dialogue name".to_string())
-        }.to_string();
+            name: Some("a dialogue name".to_string()),
+        }
+        .to_string();
 
-        let expected = "DLG y\nThis is a bit of dialogue,\nblah blah\nblah blah\nNAME a dialogue name";
+        let expected =
+            "DLG y\nThis is a bit of dialogue,\nblah blah\nblah blah\nNAME a dialogue name";
 
         assert_eq!(output, expected);
     }
