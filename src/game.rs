@@ -126,7 +126,7 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn from(string: String) -> Result<(Game, Vec<crate::Error>), crate::error::NotFound> {
+    pub fn from(string: &str) -> Result<(Game, Vec<crate::Error>), crate::error::NotFound> {
         if string.trim() == "" {
             return Err(crate::error::NotFound::Anything);
         }
@@ -893,8 +893,7 @@ mod test {
 
     #[test]
     fn game_from_string() {
-        let (output, _) =
-            Game::from(include_str!["test-resources/default.bitsy"].to_string()).unwrap();
+        let (output, _) = Game::from(include_str!["test-resources/default.bitsy"]).unwrap();
         let expected = crate::mock::game_default();
 
         assert_eq!(output, expected);
@@ -960,8 +959,7 @@ mod test {
 
     #[test]
     fn arabic() {
-        let (game, _) =
-            Game::from(include_str!("test-resources/arabic.bitsy").to_string()).unwrap();
+        let (game, _) = Game::from(include_str!("test-resources/arabic.bitsy")).unwrap();
 
         assert_eq!(game.font, Font::Arabic);
         assert_eq!(game.text_direction, TextDirection::RightToLeft);
@@ -1123,11 +1121,11 @@ mod test {
     #[test]
     fn empty_game_data_throws_error() {
         assert_eq!(
-            Game::from("".to_string()).unwrap_err(),
+            Game::from("").unwrap_err(),
             crate::error::NotFound::Anything
         );
         assert_eq!(
-            Game::from(" \n \r\n".to_string()).unwrap_err(),
+            Game::from(" \n \r\n").unwrap_err(),
             crate::error::NotFound::Anything
         );
     }
