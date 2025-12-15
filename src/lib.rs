@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(test), no_std)]
 #![allow(clippy::to_string_trait_impl)]
 extern crate alloc;
 

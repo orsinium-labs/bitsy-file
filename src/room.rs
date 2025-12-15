@@ -1,7 +1,7 @@
 use crate::*;
 use alloc::{borrow::ToOwned, string::ToString};
 use core::str::FromStr;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Room {

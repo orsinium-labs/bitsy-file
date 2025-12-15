@@ -6,7 +6,7 @@ use alloc::{format, string::String, vec::Vec};
 use core::borrow::BorrowMut;
 use core::fmt;
 use core::str::FromStr;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 /// in very early versions of Bitsy, room tiles were defined as single alphanumeric characters -
 /// so there was a maximum of 36 unique tiles. later versions are comma-separated.

@@ -49,19 +49,11 @@ mod test {
 
     fn str(s: &str, id: &str) {
         let result = Game::from(s.to_string());
-
-        if result.is_err() {
-            print!("{:?}", result);
-        }
-
         assert!(result.is_ok());
-
         let (game, _) = result.expect("failed to parse game");
-
         if ACCEPTED_FAILURES.contains(&id) {
             return;
         }
-
         assert_eq!(
             game.to_string().trim_matches('\n'),
             s.to_string().trim_matches('\n'),

@@ -89,7 +89,8 @@ impl fmt::Display for Image {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut string = String::new();
 
-        let sqrt = (self.pixels.len() as f64).sqrt() as usize; // 8 for SD, 16 for HD
+        let is_hd = self.pixels.len() >= 16 * 16;
+        let sqrt = if is_hd { 16 } else { 8 };
         for line in self.pixels.chunks(sqrt) {
             for pixel in line {
                 string.push_str(&format!("{}", *pixel));
