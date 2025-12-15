@@ -2,6 +2,7 @@ use crate::error::NotFound;
 use crate::*;
 use core::borrow::BorrowMut;
 use core::fmt;
+use core::str::FromStr;
 use std::collections::HashMap;
 
 /// in very early versions of Bitsy, room tiles were defined as single alphanumeric characters -
@@ -660,7 +661,7 @@ impl Game {
     // todo dedupe?
 
     pub fn new_palette_id(&self) -> String {
-        new_unique_id(self.palette_ids())
+        new_unique_id(&self.palette_ids())
     }
 
     /// first available tile ID.
@@ -670,31 +671,31 @@ impl Game {
         let mut ids = self.tile_ids();
         // don't allow 0 - this is a reserved ID for an implicit background tile
         ids.push("0".to_string());
-        new_unique_id(ids)
+        new_unique_id(&ids)
     }
 
     pub fn new_sprite_id(&self) -> String {
-        new_unique_id(self.sprite_ids())
+        new_unique_id(&self.sprite_ids())
     }
 
     pub fn new_room_id(&self) -> String {
-        new_unique_id(self.room_ids())
+        new_unique_id(&self.room_ids())
     }
 
     pub fn new_item_id(&self) -> String {
-        new_unique_id(self.item_ids())
+        new_unique_id(&self.item_ids())
     }
 
     pub fn new_dialogue_id(&self) -> String {
-        new_unique_id(self.dialogue_ids())
+        new_unique_id(&self.dialogue_ids())
     }
 
     pub fn new_ending_id(&self) -> String {
-        new_unique_id(self.ending_ids())
+        new_unique_id(&self.ending_ids())
     }
 
     pub fn new_variable_id(&self) -> String {
-        new_unique_id(self.variable_ids())
+        new_unique_id(&self.variable_ids())
     }
 
     pub fn get_palette(&self, id: &str) -> Option<&Palette> {

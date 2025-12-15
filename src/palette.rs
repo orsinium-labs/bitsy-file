@@ -8,6 +8,7 @@ pub struct Palette {
 }
 
 impl Palette {
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Result<(Palette, Vec<crate::Error>), crate::Error> {
         let mut lines: Vec<&str> = s.lines().collect();
 
@@ -21,8 +22,6 @@ impl Palette {
         let mut warnings = Vec::new();
 
         while let Some(line) = lines.pop() {
-            
-
             if line.starts_with("PAL ") {
                 id = line.replace("PAL ", "");
             } else if line.starts_with("NAME ") {

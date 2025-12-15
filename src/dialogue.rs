@@ -1,6 +1,6 @@
 use crate::optional_data_line;
-
 use core::fmt;
+use core::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Dialogue {
@@ -9,8 +9,10 @@ pub struct Dialogue {
     pub name: Option<String>,
 }
 
-impl Dialogue {
-    pub fn from_str(str: &str) -> Result<Dialogue, crate::Error> {
+impl FromStr for Dialogue {
+    type Err = crate::Error;
+
+    fn from_str(str: &str) -> Result<Dialogue, Self::Err> {
         let mut lines: Vec<&str> = str.lines().collect();
 
         if lines.is_empty() || !lines[0].starts_with("DLG ") {
@@ -48,7 +50,7 @@ impl fmt::Display for Dialogue {
 
 #[cfg(test)]
 mod test {
-    use crate::Dialogue;
+    use super::*;
 
     #[test]
     fn dialogue_from_str() {

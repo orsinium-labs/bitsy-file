@@ -1,4 +1,5 @@
 use core::fmt;
+use core::str::FromStr;
 
 // same as a dialogue basically
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -7,8 +8,10 @@ pub struct Ending {
     pub dialogue: String,
 }
 
-impl Ending {
-    pub fn from_str(s: &str) -> Result<Self, crate::Error> {
+impl FromStr for Ending {
+    type Err = crate::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let lines: Vec<&str> = s.lines().collect();
 
         if lines.is_empty() || !lines[0].starts_with("END ") {
@@ -30,7 +33,7 @@ impl fmt::Display for Ending {
 
 #[cfg(test)]
 mod test {
-    use crate::Ending;
+    use super::*;
 
     #[test]
     fn ending_from_string() {

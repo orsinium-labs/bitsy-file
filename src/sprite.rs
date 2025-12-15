@@ -1,7 +1,7 @@
 use crate::image::animation_frames_from_str;
 use crate::{optional_data_line, AnimationFrames, Image, Position};
-
 use core::fmt;
+use core::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Sprite {
@@ -53,8 +53,12 @@ impl Sprite {
             format!("\n{}", lines.join("\n"))
         }
     }
+}
 
-    pub fn from_str(str: &str) -> Result<Sprite, crate::Error> {
+impl FromStr for Sprite {
+    type Err = crate::Error;
+
+    fn from_str(str: &str) -> Result<Sprite, Self::Err> {
         let mut lines: Vec<&str> = str.lines().collect();
 
         if lines.is_empty() || !lines[0].starts_with("SPR ") {
@@ -135,7 +139,8 @@ impl fmt::Display for Sprite {
 
 #[cfg(test)]
 mod test {
-    use crate::{mock, Sprite};
+    use super::*;
+    use crate::mock;
 
     #[test]
     fn sprite_from_string() {

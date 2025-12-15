@@ -1,7 +1,5 @@
-use crate::{
-    optional_data_line, Exit, ExitInstance, Instance, Position, RoomFormat, RoomType, Transition,
-};
-
+use crate::*;
+use core::str::FromStr;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -185,11 +183,7 @@ impl Room {
         tiles.pop(); // remove trailing newline
 
         for instance in &self.items {
-            items.push_str(&format!(
-                "\nITM {} {}",
-                instance.id,
-                instance.position
-            ));
+            items.push_str(&format!("\nITM {} {}", instance.id, instance.position));
         }
 
         for instance in &self.exits {
@@ -211,11 +205,7 @@ impl Room {
         }
 
         for instance in &self.endings {
-            endings.push_str(&format!(
-                "\nEND {} {}",
-                instance.id,
-                instance.position
-            ));
+            endings.push_str(&format!("\nEND {} {}", instance.id, instance.position));
         }
 
         format!(

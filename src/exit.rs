@@ -1,6 +1,6 @@
 use crate::Position;
-
 use core::fmt;
+use core::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Transition {
@@ -15,8 +15,10 @@ pub enum Transition {
     SlideRight,
 }
 
-impl Transition {
-    pub fn from_str(str: &str) -> Result<Transition, crate::Error> {
+impl FromStr for Transition {
+    type Err = crate::Error;
+
+    fn from_str(str: &str) -> Result<Transition, Self::Err> {
         match str {
             "fade_w" => Ok(Transition::FadeToWhite),
             "fade_b" => Ok(Transition::FadeToBlack),
@@ -60,8 +62,10 @@ pub struct Exit {
     pub effect: Transition,
 }
 
-impl Exit {
-    pub fn from_str(s: &str) -> Result<Self, crate::Error> {
+impl FromStr for Exit {
+    type Err = crate::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<&str> = s.split_whitespace().collect();
 
         if parts.len() < 2 {
@@ -89,19 +93,13 @@ impl Exit {
 
 impl fmt::Display for Exit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{} {}{}",
-            self.room_id,
-            self.position,
-            self.effect
-        )
+        write!(f, "{} {}{}", self.room_id, self.position, self.effect)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{Exit, Position, Transition};
+    use super::*;
 
     #[test]
     fn exit_from_string() {

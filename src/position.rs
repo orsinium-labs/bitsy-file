@@ -1,4 +1,5 @@
 use core::fmt;
+use core::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Position {
@@ -6,8 +7,10 @@ pub struct Position {
     pub y: u8,
 }
 
-impl Position {
-    pub fn from_str(s: &str) -> Result<Self, crate::Error> {
+impl FromStr for Position {
+    type Err = crate::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut parts = s.split(',');
 
         let x = parts.next().unwrap();
@@ -29,7 +32,7 @@ impl fmt::Display for Position {
 
 #[cfg(test)]
 mod test {
-    use crate::Position;
+    use super::*;
 
     #[test]
     fn position_from_str() {

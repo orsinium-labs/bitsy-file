@@ -1,6 +1,7 @@
 use crate::image::animation_frames_from_str;
 use crate::{optional_data_line, AnimationFrames, Image};
 use core::fmt;
+use core::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Item {
@@ -23,8 +24,12 @@ impl Item {
     fn colour_line(&self) -> String {
         optional_data_line("COL", self.colour_id.as_ref())
     }
+}
 
-    pub fn from_str(str: &str) -> Result<Item, crate::Error> {
+impl FromStr for Item {
+    type Err = crate::Error;
+
+    fn from_str(str: &str) -> Result<Item, Self::Err> {
         let mut lines: Vec<&str> = str.lines().collect();
 
         if lines.is_empty() || !lines[0].starts_with("ITM ") {
@@ -79,7 +84,8 @@ impl fmt::Display for Item {
 
 #[cfg(test)]
 mod test {
-    use crate::{mock, Item};
+    use super::*;
+    use crate::mock;
 
     #[test]
     fn item_from_string() {

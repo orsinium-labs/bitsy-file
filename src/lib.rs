@@ -1,3 +1,5 @@
+#![allow(clippy::to_string_trait_impl)]
+
 use core::fmt::Display;
 use radix_fmt::radix_36;
 
@@ -129,22 +131,20 @@ fn segments_from_str(str: &str) -> Vec<String> {
 /// tries to use an existing ID - if it is already in use, generate a new one
 /// then return the ID (either original or new)
 /// todo refactor (unnecessary clones etc.)
-fn try_id(ids: &Vec<String>, id: &String) -> String {
-    let id = id.clone();
-    let ids = ids.clone();
-    if is_id_available(&ids, &id) {
-        id
+fn try_id(ids: &[String], id: &str) -> String {
+    if is_id_available(ids, id) {
+        id.to_owned()
     } else {
         new_unique_id(ids)
     }
 }
 
-fn is_id_available(ids: &Vec<String>, id: &String) -> bool {
-    !ids.contains(id)
+fn is_id_available(ids: &[String], id: &str) -> bool {
+    !ids.iter().any(|v| v == id)
 }
 
 /// e.g. pass all tile IDs into this to get a new non-conflicting tile ID
-fn new_unique_id(ids: Vec<String>) -> String {
+fn new_unique_id(ids: &[String]) -> String {
     let mut new_id: u64 = 0;
 
     while ids.contains(&new_id.to_base36()) {
@@ -183,7 +183,7 @@ mod test {
 
     #[test]
     fn to_base36() {
-        assert_eq!((37 as u64).to_base36(), "11");
+        assert_eq!(37u64.to_base36(), "11");
     }
 
     #[test]
@@ -223,42 +223,36 @@ mod test {
     #[test]
     fn test_try_id() {
         // does a conflict generate a new ID?
-        assert_eq!(
-            try_id(&vec!["0".to_string(), "1".to_string()], &"1".to_string()),
-            "2"
-        );
+        assert_eq!(try_id(&["0".to_string(), "1".to_string()], "1"), "2");
         // with no conflict, does the ID remain the same?
-        assert_eq!(
-            try_id(&vec!["0".to_string(), "1".to_string()], &"3".to_string()),
-            "3"
-        );
+        assert_eq!(try_id(&["0".to_string(), "1".to_string()], "3"), "3");
     }
 
     #[test]
     fn test_new_unique_id() {
         // start
         assert_eq!(
-            new_unique_id(vec!["1".to_string(), "z".to_string()]),
+            new_unique_id(&["1".to_string(), "z".to_string()]),
             "0".to_string()
         );
         // middle
         assert_eq!(
-            new_unique_id(vec!["0".to_string(), "2".to_string()]),
+            new_unique_id(&["0".to_string(), "2".to_string()]),
             "1".to_string()
         );
         // end
         assert_eq!(
-            new_unique_id(vec!["0".to_string(), "1".to_string()]),
+            new_unique_id(&["0".to_string(), "1".to_string()]),
             "2".to_string()
         );
         // check sorting
         assert_eq!(
-            new_unique_id(vec!["1".to_string(), "0".to_string()]),
+            new_unique_id(&["1".to_string(), "0".to_string()]),
             "2".to_string()
         );
         // check deduplication
         assert_eq!(
-            new_unique_id(vec!["0".to_string(), "0".to_string(), "1".to_string()]),
+            new_unique_id(&["0".to_string(), "0".to_string(), "1".to_string()]),
             "2".to_string()
         );
     }
