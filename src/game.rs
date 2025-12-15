@@ -216,9 +216,9 @@ impl Game {
                 if segment.starts_with("SET ") {
                     room_type = RoomType::Set;
                 }
-                rooms.push(Room::from(segment));
+                rooms.push(Room::from(segment.as_str()));
             } else if segment.starts_with("TIL ") {
-                tiles.push(Tile::from(segment));
+                tiles.push(Tile::from(segment.as_str()));
             } else if segment.starts_with("SPR ") {
                 let result = Sprite::from_str(&segment);
 
@@ -254,7 +254,7 @@ impl Game {
                     warnings.push(result.unwrap_err());
                 }
             } else if segment.starts_with("VAR ") {
-                variables.push(Variable::from(segment));
+                variables.push(Variable::from(segment.as_str()));
             } else if segment.starts_with("FONT ") {
                 font_data = Some(segment);
             }
@@ -290,7 +290,7 @@ impl Game {
     }
 
     /// todo refactor this into "get T by ID", taking a Vec<T> and an ID name?
-    pub fn get_sprite_by_id(&self, id: String) -> Result<&Sprite, crate::error::NotFound> {
+    pub fn get_sprite_by_id(&self, id: &str) -> Result<&Sprite, crate::error::NotFound> {
         let index = self.sprites.iter().position(|sprite| sprite.id == id);
 
         match index {
@@ -299,7 +299,7 @@ impl Game {
         }
     }
 
-    pub fn get_tile_by_id(&self, id: String) -> Result<&Tile, crate::error::NotFound> {
+    pub fn get_tile_by_id(&self, id: &str) -> Result<&Tile, crate::error::NotFound> {
         let index = self.tiles.iter().position(|tile| tile.id == id);
 
         match index {
@@ -308,7 +308,7 @@ impl Game {
         }
     }
 
-    pub fn get_room_by_id(&self, id: String) -> Result<&Room, crate::error::NotFound> {
+    pub fn get_room_by_id(&self, id: &str) -> Result<&Room, crate::error::NotFound> {
         let index = self.rooms.iter().position(|room| room.id == id);
 
         match index {
@@ -318,23 +318,21 @@ impl Game {
     }
 
     pub fn get_avatar(&self) -> Result<&Sprite, crate::error::NotFound> {
-        self.get_sprite_by_id("A".to_string())
+        self.get_sprite_by_id("A")
     }
 
     // todo result
-    pub fn get_tiles_by_ids(&self, ids: Vec<String>) -> Vec<&Tile> {
+    pub fn get_tiles_by_ids(&self, ids: &[&str]) -> Vec<&Tile> {
         let mut tiles: Vec<&Tile> = Vec::new();
-
         for id in ids {
             if let Ok(tile) = self.get_tile_by_id(id) {
                 tiles.push(tile);
             }
         }
-
         tiles
     }
 
-    pub fn get_tiles_for_room(&self, id: String) -> Result<Vec<&Tile>, crate::error::NotFound> {
+    pub fn get_tiles_for_room(&self, id: &str) -> Result<Vec<&Tile>, crate::error::NotFound> {
         let room = self.get_room_by_id(id)?;
         let mut tile_ids = room.tiles.clone();
         tile_ids.sort();
@@ -344,8 +342,14 @@ impl Game {
         if let Some(zero_index) = zero_index {
             tile_ids.remove(zero_index);
         }
-        // remove Ok once this function returns a result
-        Ok(self.get_tiles_by_ids(tile_ids))
+
+        let mut tiles: Vec<&Tile> = Vec::new();
+        for id in tile_ids {
+            if let Ok(tile) = self.get_tile_by_id(&id) {
+                tiles.push(tile);
+            }
+        }
+        Ok(tiles)
     }
 
     // return? array of changes made? error/ok?
@@ -973,9 +977,7 @@ mod test {
     #[test]
     fn get_tiles_for_room() {
         assert_eq!(
-            crate::mock::game_default()
-                .get_tiles_for_room("0".to_string())
-                .unwrap(),
+            crate::mock::game_default().get_tiles_for_room("0").unwrap(),
             vec![&crate::mock::tile_default()]
         )
     }
@@ -1036,7 +1038,7 @@ mod test {
         );
         assert_eq!(game.palette_ids(), vec!["0".to_string(), "1".to_string()]);
         assert_eq!(
-            game.get_room_by_id("1".to_string()).unwrap().palette_id,
+            game.get_room_by_id("1").unwrap().palette_id,
             Some("1".to_string())
         );
 
@@ -1050,10 +1052,7 @@ mod test {
         sprite.room_id = Some(room_id.clone());
         game_b.add_sprite(sprite);
         game_a.merge(&game_b);
-        assert_eq!(
-            game_a.get_sprite_by_id("2".to_string()).unwrap().room_id,
-            Some(room_id)
-        );
+        assert_eq!(game_a.get_sprite_by_id("2").unwrap().room_id, Some(room_id));
     }
 
     #[test]

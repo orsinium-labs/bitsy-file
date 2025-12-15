@@ -7,8 +7,8 @@ pub struct Variable {
     pub initial_value: String,
 }
 
-impl From<String> for Variable {
-    fn from(string: String) -> Variable {
+impl From<&str> for Variable {
+    fn from(string: &str) -> Variable {
         let id_value: Vec<&str> = string.lines().collect();
         let id = id_value[0].replace("VAR ", "");
 
@@ -36,7 +36,7 @@ mod test {
     #[test]
     fn variable_from_string() {
         assert_eq!(
-            Variable::from("VAR a\n42".to_string()),
+            Variable::from("VAR a\n42"),
             Variable {
                 id: "a".to_string(),
                 initial_value: "42".to_string()

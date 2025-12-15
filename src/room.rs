@@ -39,8 +39,8 @@ impl Room {
     }
 }
 
-impl From<String> for Room {
-    fn from(string: String) -> Room {
+impl From<&str> for Room {
+    fn from(string: &str) -> Room {
         let string = string.replace("ROOM ", "");
         let string = string.replace("SET ", "");
         let mut lines: Vec<&str> = string.lines().collect();
@@ -242,7 +242,7 @@ mod test {
     #[test]
     fn room_from_string() {
         assert_eq!(
-            Room::from(include_str!("test-resources/room").to_string()),
+            Room::from(include_str!("test-resources/room")),
             crate::mock::room()
         );
     }
@@ -257,7 +257,7 @@ mod test {
 
     #[test]
     fn room_walls_array() {
-        let output = Room::from(include_str!("test-resources/room-with-walls").to_string());
+        let output = Room::from(include_str!("test-resources/room-with-walls"));
 
         assert_eq!(output.walls, Some(vec!["a".to_string(), "f".to_string()]));
     }

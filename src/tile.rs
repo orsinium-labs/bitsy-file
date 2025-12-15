@@ -94,8 +94,8 @@ impl Tile {
     }
 }
 
-impl From<String> for Tile {
-    fn from(string: String) -> Tile {
+impl From<&str> for Tile {
+    fn from(string: &str) -> Tile {
         let mut lines: Vec<&str> = string.lines().collect();
 
         let id = lines[0].replace("TIL ", "");
@@ -152,7 +152,7 @@ mod test {
 
     #[test]
     fn tile_from_string() {
-        let output = Tile::from(include_str!("test-resources/tile").to_string());
+        let output = Tile::from(include_str!("test-resources/tile"));
 
         let expected = Tile {
             id: "z".to_string(),
