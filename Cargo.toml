@@ -1,15 +1,14 @@
 [package]
-name = "bitsy-parser"
-version = "0.710.1"
-authors = ["Max Bradbury <max@tinybird.info>"]
+name = "bitsy-nostd-parser"
+version = "0.711.0"
+authors = ["Gram <git@orsinium.dev>", "Max Bradbury <max@tinybird.info>"]
 edition = "2021"
 description = "A parser and utilities for working with Bitsy game data"
 readme = "README.md"
-repository = "https://tinybird.dev/max/bitsy-parser"
+repository = "https://github.com/orsinium-labs/bitsy-nostd-parser"
 license = "MIT"
-keywords = ["gamedev"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+keywords = ["gamedev", "bitsy", "nostd"]
+categories = ["no-std"]
 
 [dependencies]
 hashbrown = "0.16"

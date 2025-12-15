@@ -78,7 +78,6 @@ impl AnimationFrames for Vec<Image> {
     }
 }
 
-/// this doesn't work inside ToBase36 for some reason
 fn to_base36(mut x: u32) -> String {
     let mut result = Vec::new();
     loop {
@@ -90,16 +89,6 @@ fn to_base36(mut x: u32) -> String {
         }
     }
     result.into_iter().rev().collect()
-}
-
-pub trait ToBase36 {
-    fn to_base36(&self) -> String;
-}
-
-impl ToBase36 for u32 {
-    fn to_base36(&self) -> String {
-        to_base36(*self)
-    }
 }
 
 /// e.g. `\nNAME DLG_0`
@@ -158,7 +147,7 @@ fn is_id_available(ids: &[String], id: &str) -> bool {
 /// e.g. pass all tile IDs into this to get a new non-conflicting tile ID
 fn new_unique_id(ids: &[String]) -> String {
     let mut new_id: u32 = 0;
-    while ids.contains(&new_id.to_base36()) {
+    while ids.contains(&to_base36(new_id)) {
         new_id += 1;
     }
     to_base36(new_id)
@@ -189,8 +178,8 @@ mod test {
     use super::*;
 
     #[test]
-    fn to_base36() {
-        assert_eq!(37u32.to_base36(), "11");
+    fn test_to_base36() {
+        assert_eq!(to_base36(37), "11");
     }
 
     #[test]
