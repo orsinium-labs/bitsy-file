@@ -1,3 +1,4 @@
+#![no_std]
 #![allow(clippy::to_string_trait_impl)]
 extern crate alloc;
 

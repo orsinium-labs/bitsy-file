@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod test {
     use crate::game::Game;
+    use alloc::string::ToString;
 
     /// bitsy-parser will parse these games correctly
     /// but the output does not match the input, due to game data errors.
