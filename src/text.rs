@@ -1,3 +1,6 @@
+use alloc::string::String;
+use alloc::string::ToString;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Font {
     AsciiSmall, // default - does not appear in game data

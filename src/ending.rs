@@ -1,3 +1,4 @@
+use alloc::{string::String, vec::Vec};
 use core::fmt;
 use core::str::FromStr;
 
@@ -34,6 +35,7 @@ impl fmt::Display for Ending {
 #[cfg(test)]
 mod test {
     use super::*;
+    use alloc::string::ToString;
 
     #[test]
     fn ending_from_string() {

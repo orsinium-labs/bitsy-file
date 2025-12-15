@@ -1,5 +1,7 @@
 use crate::image::animation_frames_from_str;
 use crate::{optional_data_line, AnimationFrames, Image};
+use alloc::string::ToString;
+use alloc::{format, string::String, vec::Vec};
 
 #[derive(Clone, Debug, Eq)]
 pub struct Tile {
@@ -144,7 +146,9 @@ impl ToString for Tile {
 
 #[cfg(test)]
 mod test {
-    use crate::{mock, Image, Tile};
+    use super::*;
+    use crate::mock;
+    use alloc::vec;
 
     #[test]
     fn tile_from_string() {

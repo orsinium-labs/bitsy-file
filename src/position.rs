@@ -33,6 +33,7 @@ impl fmt::Display for Position {
 #[cfg(test)]
 mod test {
     use super::*;
+    use alloc::string::ToString;
 
     #[test]
     fn position_from_str() {

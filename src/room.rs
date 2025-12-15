@@ -1,4 +1,5 @@
 use crate::*;
+use alloc::{borrow::ToOwned, string::ToString};
 use core::str::FromStr;
 use std::collections::HashMap;
 
@@ -235,6 +236,8 @@ impl Room {
 #[cfg(test)]
 mod test {
     use crate::{Room, RoomFormat, RoomType};
+    use alloc::string::ToString;
+    use alloc::vec;
 
     #[test]
     fn room_from_string() {

@@ -1,4 +1,9 @@
 use crate::Colour;
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Palette {
@@ -62,7 +67,9 @@ impl ToString for Palette {
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use crate::{Colour, Palette};
+    use alloc::vec;
 
     #[test]
     fn palette_from_string() {

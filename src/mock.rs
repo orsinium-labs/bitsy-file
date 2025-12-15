@@ -1,8 +1,10 @@
 use crate::game::{RoomFormat, RoomType};
 use crate::*;
+use alloc::string::ToString;
 
 pub mod image {
     use crate::Image;
+    use alloc::{vec, vec::Vec};
 
     pub fn chequers_1() -> Image {
         Image {
@@ -92,7 +94,7 @@ pub fn avatar() -> Sprite {
         position: Some(Position { x: 2, y: 5 }),
         colour_id: None,
         dialogue_id: None,
-        items: vec![],
+        items: Vec::new(),
     }
 }
 
@@ -139,12 +141,14 @@ pub fn sprite() -> Sprite {
         room_id: Some("4".to_string()),
         position: Some(Position { x: 9, y: 7 }),
         colour_id: None,
-        items: vec![],
+        items: Vec::new(),
     }
 }
 
 pub mod item {
     use crate::{Image, Item};
+    use alloc::string::ToString;
+    use alloc::vec;
 
     pub fn key() -> Item {
         Item {
@@ -777,9 +781,9 @@ pub fn game_default() -> Game {
                 "0".to_string(),
                 "0".to_string(),
             ],
-            items: vec![],
-            exits: vec![],
-            endings: vec![],
+            items: Vec::new(),
+            exits: Vec::new(),
+            endings: Vec::new(),
             walls: None,
         }],
         tiles: vec![self::tile_default()],
@@ -798,7 +802,7 @@ pub fn game_default() -> Game {
                 position: Option::from(Position { x: 4, y: 4 }),
                 colour_id: None,
                 dialogue_id: None,
-                items: vec![],
+                items: Vec::new(),
             },
             Sprite {
                 id: "a".to_string(),
@@ -814,7 +818,7 @@ pub fn game_default() -> Game {
                 room_id: Some("0".to_string()),
                 position: Some(Position { x: 8, y: 12 }),
                 colour_id: None,
-                items: vec![],
+                items: Vec::new(),
             },
         ],
         items: vec![
@@ -850,7 +854,7 @@ pub fn game_default() -> Game {
                 name: Some("key dialog".to_string()),
             },
         ],
-        endings: vec![],
+        endings: Vec::new(),
         variables: vec![Variable {
             id: "a".to_string(),
             initial_value: "42".to_string(),

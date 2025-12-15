@@ -1,4 +1,5 @@
 use crate::optional_data_line;
+use alloc::{string::String, vec::Vec};
 use core::fmt;
 use core::str::FromStr;
 
@@ -51,6 +52,7 @@ impl fmt::Display for Dialogue {
 #[cfg(test)]
 mod test {
     use super::*;
+    use alloc::string::ToString;
 
     #[test]
     fn dialogue_from_str() {

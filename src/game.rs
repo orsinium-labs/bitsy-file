@@ -1,5 +1,7 @@
 use crate::error::NotFound;
 use crate::*;
+use alloc::string::ToString;
+use alloc::{format, string::String, vec::Vec};
 use core::borrow::BorrowMut;
 use core::fmt;
 use core::str::FromStr;
@@ -879,6 +881,10 @@ impl Game {
 #[cfg(test)]
 mod test {
     use crate::{Colour, Font, Game, Image, Palette, TextDirection, Tile, Version};
+    use alloc::format;
+    use alloc::string::ToString;
+    use alloc::vec;
+    use alloc::vec::Vec;
 
     #[test]
     fn game_from_string() {

@@ -1,3 +1,9 @@
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Colour {
     pub red: u8,
@@ -39,6 +45,7 @@ impl ToString for Colour {
 #[cfg(test)]
 mod test {
     use crate::Colour;
+    use alloc::string::ToString;
 
     #[test]
     fn colour_from_string() {

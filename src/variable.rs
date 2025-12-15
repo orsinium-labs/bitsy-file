@@ -1,3 +1,6 @@
+use alloc::string::ToString;
+use alloc::{format, string::String, vec::Vec};
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Variable {
     pub id: String,
@@ -28,6 +31,7 @@ impl ToString for Variable {
 #[cfg(test)]
 mod test {
     use crate::Variable;
+    use alloc::string::ToString;
 
     #[test]
     fn variable_from_string() {

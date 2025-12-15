@@ -1,5 +1,7 @@
 use crate::image::animation_frames_from_str;
 use crate::{optional_data_line, AnimationFrames, Image};
+use alloc::string::ToString;
+use alloc::{string::String, vec::Vec};
 use core::fmt;
 use core::str::FromStr;
 

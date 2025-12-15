@@ -1,5 +1,8 @@
 #![allow(clippy::to_string_trait_impl)]
+extern crate alloc;
 
+use alloc::string::ToString;
+use alloc::{format, string::String, vec, vec::Vec};
 use core::fmt::Display;
 
 pub mod colour;
@@ -76,11 +79,11 @@ impl AnimationFrames for Vec<Image> {
 
 /// this doesn't work inside ToBase36 for some reason
 fn to_base36(mut x: u32) -> String {
-    let mut result = vec![];
+    let mut result = Vec::new();
     loop {
         let m = x % 36;
         x /= 36;
-        result.push(std::char::from_digit(m, 36).unwrap());
+        result.push(core::char::from_digit(m, 36).unwrap());
         if x == 0 {
             break;
         }
@@ -141,7 +144,7 @@ fn segments_from_str(str: &str) -> Vec<String> {
 /// todo refactor (unnecessary clones etc.)
 fn try_id(ids: &[String], id: &str) -> String {
     if is_id_available(ids, id) {
-        id.to_owned()
+        id.to_string()
     } else {
         new_unique_id(ids)
     }
@@ -182,10 +185,7 @@ impl Unquote for String {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        mock, new_unique_id, optional_data_line, segments_from_str, try_id, Quote, ToBase36,
-        Unquote,
-    };
+    use super::*;
 
     #[test]
     fn to_base36() {

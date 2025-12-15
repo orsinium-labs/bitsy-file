@@ -1,3 +1,4 @@
+use alloc::{format, string::String, vec::Vec};
 use core::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -115,6 +116,8 @@ pub fn animation_frames_from_str(str: &str) -> Vec<Image> {
 mod test {
     use crate::image::{animation_frames_from_str, Image};
     use crate::mock;
+    use alloc::string::ToString;
+    use alloc::vec;
 
     #[test]
     fn image_from_string() {
