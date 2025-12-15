@@ -1,7 +1,6 @@
 #![allow(clippy::to_string_trait_impl)]
 
 use core::fmt::Display;
-use radix_fmt::radix_36;
 
 pub mod colour;
 pub mod dialogue;
@@ -76,15 +75,24 @@ impl AnimationFrames for Vec<Image> {
 }
 
 /// this doesn't work inside ToBase36 for some reason
-fn to_base36(int: u64) -> String {
-    format!("{}", radix_36(int))
+fn to_base36(mut x: u32) -> String {
+    let mut result = vec![];
+    loop {
+        let m = x % 36;
+        x /= 36;
+        result.push(std::char::from_digit(m, 36).unwrap());
+        if x == 0 {
+            break;
+        }
+    }
+    result.into_iter().rev().collect()
 }
 
 pub trait ToBase36 {
     fn to_base36(&self) -> String;
 }
 
-impl ToBase36 for u64 {
+impl ToBase36 for u32 {
     fn to_base36(&self) -> String {
         to_base36(*self)
     }
@@ -145,12 +153,10 @@ fn is_id_available(ids: &[String], id: &str) -> bool {
 
 /// e.g. pass all tile IDs into this to get a new non-conflicting tile ID
 fn new_unique_id(ids: &[String]) -> String {
-    let mut new_id: u64 = 0;
-
+    let mut new_id: u32 = 0;
     while ids.contains(&new_id.to_base36()) {
         new_id += 1;
     }
-
     to_base36(new_id)
 }
 
@@ -183,7 +189,7 @@ mod test {
 
     #[test]
     fn to_base36() {
-        assert_eq!(37u64.to_base36(), "11");
+        assert_eq!(37u32.to_base36(), "11");
     }
 
     #[test]
