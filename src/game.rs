@@ -6,9 +6,9 @@ use crate::{
 use loe::TransformMode;
 
 use crate::error::NotFound;
-use std::borrow::BorrowMut;
+use core::borrow::BorrowMut;
+use core::fmt;
 use std::collections::HashMap;
-use std::fmt;
 
 /// in very early versions of Bitsy, room tiles were defined as single alphanumeric characters -
 /// so there was a maximum of 36 unique tiles. later versions are comma-separated.
@@ -89,7 +89,7 @@ impl fmt::Display for VersionError {
     }
 }
 
-impl std::error::Error for VersionError {}
+impl core::error::Error for VersionError {}
 
 impl Version {
     fn from(str: &str) -> Result<Version, VersionError> {
@@ -833,8 +833,6 @@ impl Game {
         let mut tile_id_changes: HashMap<String, String> = HashMap::new();
 
         while let Some(tile) = tiles_temp.pop() {
-            
-
             if tile == crate::mock::tile_background() {
                 tile_id_changes.insert(tile.id, "0".to_string());
             } else if tiles_temp.contains(&tile) {
@@ -867,10 +865,7 @@ impl Game {
 
     fn room_format_line(&self) -> String {
         if self.room_format.is_some() {
-            format!(
-                "\n\n! ROOM_FORMAT {}",
-                self.room_format.unwrap()
-            )
+            format!("\n\n! ROOM_FORMAT {}", self.room_format.unwrap())
         } else {
             "".to_string()
         }

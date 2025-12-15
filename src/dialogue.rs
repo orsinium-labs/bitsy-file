@@ -1,6 +1,6 @@
 use crate::optional_data_line;
 
-use std::fmt;
+use core::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Dialogue {

@@ -1,4 +1,4 @@
-use std::fmt;
+use core::fmt;
 
 // same as a dialogue basically
 #[derive(Clone, Debug, Eq, PartialEq)]

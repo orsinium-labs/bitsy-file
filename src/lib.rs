@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use core::fmt::Display;
 use std::io::Cursor;
 
 use loe::{process, Config, TransformMode};

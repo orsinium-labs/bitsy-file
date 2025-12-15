@@ -1,6 +1,6 @@
 use crate::image::animation_frames_from_str;
 use crate::{optional_data_line, AnimationFrames, Image};
-use std::fmt;
+use core::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Item {
