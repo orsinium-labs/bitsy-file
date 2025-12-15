@@ -93,8 +93,8 @@ impl fmt::Display for Exit {
             f,
             "{} {}{}",
             self.room_id,
-            self.position.to_string(),
-            self.effect.to_string()
+            self.position,
+            self.effect
         )
     }
 }

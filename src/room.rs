@@ -188,20 +188,19 @@ impl Room {
             items.push_str(&format!(
                 "\nITM {} {}",
                 instance.id,
-                instance.position.to_string()
+                instance.position
             ));
         }
 
         for instance in &self.exits {
             exits.push_str(&format!(
                 "\nEXT {} {}{}{}{}",
-                instance.position.to_string(),
-                instance.exit.to_string(),
+                instance.position,
+                instance.exit,
                 match &instance.transition {
                     Some(transition) => transition,
                     None => &Transition::None,
-                }
-                .to_string(),
+                },
                 if instance.dialogue_id.is_some() {
                     " DLG "
                 } else {
@@ -215,7 +214,7 @@ impl Room {
             endings.push_str(&format!(
                 "\nEND {} {}",
                 instance.id,
-                instance.position.to_string()
+                instance.position
             ));
         }
 

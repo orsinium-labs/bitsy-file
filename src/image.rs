@@ -67,7 +67,7 @@ impl Image {
 
         for line in lines {
             let line = &line[..dimension];
-            for char in line.chars().into_iter() {
+            for char in line.chars() {
                 // todo push warning on integers other than 0/1
                 pixels.push(match char {
                     '1' => 1,

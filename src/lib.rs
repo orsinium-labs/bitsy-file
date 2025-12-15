@@ -68,7 +68,7 @@ impl AnimationFrames for Vec<Image> {
             string.push_str(&frame.to_string());
 
             if i < last_frame {
-                string.push_str(&"\n>\n".to_string());
+                string.push_str("\n>\n");
             }
         }
 
@@ -124,7 +124,7 @@ fn segments_from_str(str: &str) -> Vec<String> {
             inside_escaped_block = !inside_escaped_block;
         }
 
-        if line == "" && !inside_escaped_block {
+        if line.is_empty() && !inside_escaped_block {
             output.push(current_segment.join("\n"));
             current_segment = Vec::new();
         } else {

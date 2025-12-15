@@ -29,7 +29,7 @@ impl Sprite {
             format!(
                 "\nPOS {} {}",
                 self.room_id.as_ref().unwrap(),
-                self.position.as_ref().unwrap().to_string()
+                self.position.as_ref().unwrap()
             )
         } else {
             "".to_string()

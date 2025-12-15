@@ -20,8 +20,8 @@ impl Palette {
         let mut colours = Vec::new();
         let mut warnings = Vec::new();
 
-        while !lines.is_empty() {
-            let line = lines.pop().unwrap();
+        while let Some(line) = lines.pop() {
+            
 
             if line.starts_with("PAL ") {
                 id = line.replace("PAL ", "");

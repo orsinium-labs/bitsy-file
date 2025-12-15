@@ -832,8 +832,8 @@ impl Game {
         let mut unique_tiles: Vec<Tile> = Vec::new();
         let mut tile_id_changes: HashMap<String, String> = HashMap::new();
 
-        while !tiles_temp.is_empty() {
-            let tile = tiles_temp.pop().unwrap();
+        while let Some(tile) = tiles_temp.pop() {
+            
 
             if tile == crate::mock::tile_background() {
                 tile_id_changes.insert(tile.id, "0".to_string());
@@ -869,7 +869,7 @@ impl Game {
         if self.room_format.is_some() {
             format!(
                 "\n\n! ROOM_FORMAT {}",
-                self.room_format.unwrap().to_string()
+                self.room_format.unwrap()
             )
         } else {
             "".to_string()
