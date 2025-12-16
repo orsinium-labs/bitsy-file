@@ -42,8 +42,8 @@ pub use variable::Variable;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Instance {
-    position: Position,
-    id: String, // item / ending id
+    pub position: Position,
+    pub id: String, // item / ending id
 }
 
 /// a Room can have many Exits in different positions,
@@ -51,10 +51,10 @@ pub struct Instance {
 /// todo make a from_str() function for this
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ExitInstance {
-    position: Position,
-    exit: Exit,
-    transition: Option<Transition>,
-    dialogue_id: Option<String>,
+    pub position: Position,
+    pub exit: Exit,
+    pub transition: Option<Transition>,
+    pub dialogue_id: Option<String>,
 }
 
 pub trait AnimationFrames {
