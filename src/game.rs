@@ -304,51 +304,26 @@ impl Game {
         ))
     }
 
-    /// todo refactor this into "get T by ID", taking a Vec<T> and an ID name?
-    pub fn get_sprite_by_id(&self, id: &str) -> Result<&Sprite, crate::error::NotFound> {
-        let index = self.sprites.iter().position(|sprite| sprite.id == id);
-
-        match index {
-            Some(index) => Ok(&self.sprites[index]),
-            None => Err(crate::error::NotFound::Sprite),
-        }
+    pub fn get_sprite(&self, id: &str) -> Option<&Sprite> {
+        self.sprites.iter().find(|sprite| sprite.id == id)
     }
 
-    pub fn get_tile_by_id(&self, id: &str) -> Result<&Tile, crate::error::NotFound> {
-        let index = self.tiles.iter().position(|tile| tile.id == id);
-
-        match index {
-            Some(index) => Ok(&self.tiles[index]),
-            None => Err(crate::error::NotFound::Tile),
-        }
+    pub fn get_tile(&self, id: &str) -> Option<&Tile> {
+        self.tiles.iter().find(|tile| tile.id == id)
     }
 
-    pub fn get_room_by_id(&self, id: &str) -> Result<&Room, crate::error::NotFound> {
-        let index = self.rooms.iter().position(|room| room.id == id);
-
-        match index {
-            Some(index) => Ok(&self.rooms[index]),
-            None => Err(crate::error::NotFound::Room),
-        }
+    pub fn get_room(&self, id: &str) -> Option<&Room> {
+        self.rooms.iter().find(|room| room.id == id)
     }
 
-    pub fn get_avatar(&self) -> Result<&Sprite, crate::error::NotFound> {
-        self.get_sprite_by_id("A")
+    pub fn get_avatar(&self) -> Option<&Sprite> {
+        self.get_sprite("A")
     }
 
-    // todo result
-    pub fn get_tiles_by_ids(&self, ids: &[&str]) -> Vec<&Tile> {
-        let mut tiles: Vec<&Tile> = Vec::new();
-        for id in ids {
-            if let Ok(tile) = self.get_tile_by_id(id) {
-                tiles.push(tile);
-            }
-        }
-        tiles
-    }
-
-    pub fn get_tiles_for_room(&self, id: &str) -> Result<Vec<&Tile>, crate::error::NotFound> {
-        let room = self.get_room_by_id(id)?;
+    pub fn get_room_tiles(&self, room_id: &str) -> Vec<&Tile> {
+        let Some(room) = self.get_room(room_id) else {
+            return Vec::new();
+        };
         let mut tile_ids = room.tiles.clone();
         tile_ids.sort();
         tile_ids.dedup();
@@ -360,11 +335,11 @@ impl Game {
 
         let mut tiles: Vec<&Tile> = Vec::new();
         for id in tile_ids {
-            if let Ok(tile) = self.get_tile_by_id(&id) {
+            if let Some(tile) = self.get_tile(&id) {
                 tiles.push(tile);
             }
         }
-        Ok(tiles)
+        tiles
     }
 }
 
@@ -754,7 +729,7 @@ mod test {
     #[test]
     fn get_tiles_for_room() {
         assert_eq!(
-            crate::mock::game_default().get_tiles_for_room("0").unwrap(),
+            crate::mock::game_default().get_room_tiles("0"),
             vec![&crate::mock::tile_default()]
         )
     }
