@@ -188,73 +188,90 @@ impl Game {
                 } else {
                     warnings.push(Error::Version);
                 }
-            } else if segment.starts_with("! ROOM_FORMAT") {
+                continue;
+            }
+            if segment.starts_with("! ROOM_FORMAT") {
                 let segment = segment.replace("! ROOM_FORMAT ", "");
                 room_format =
                     Some(RoomFormat::from(&segment).unwrap_or(RoomFormat::CommaSeparated));
-            } else if segment.starts_with("DEFAULT_FONT") {
-                let segment = segment.replace("DEFAULT_FONT ", "");
+                continue;
+            }
+            let Some((first_word, _)) = segment.split_once(' ') else {
+                continue;
+            };
+            match first_word {
+                "DEFAULT_FONT" => {
+                    let segment = segment.replace("DEFAULT_FONT ", "");
 
-                font = Font::from(&segment);
+                    font = Font::from(&segment);
 
-                if font == Font::Custom {
-                    custom_font = Some(segment.to_string());
+                    if font == Font::Custom {
+                        custom_font = Some(segment.to_string());
+                    }
                 }
-            } else if segment.trim() == "TEXT_DIRECTION RTL" {
-                text_direction = TextDirection::RightToLeft;
-            } else if segment.starts_with("PAL ") {
-                let result = Palette::from_str(&segment);
-                if let Ok((palette, mut errors)) = result {
-                    palettes.push(palette);
-                    warnings.append(&mut errors);
-                } else {
-                    warnings.push(result.unwrap_err());
+                "TEXT_DIRECTION" => {
+                    if segment.trim() == "TEXT_DIRECTION RTL" {
+                        text_direction = TextDirection::RightToLeft;
+                    }
                 }
-            } else if segment.starts_with("ROOM ") || segment.starts_with("SET ") {
-                if segment.starts_with("SET ") {
-                    room_type = RoomType::Set;
+                "PAL" => {
+                    let result = Palette::from_str(&segment);
+                    if let Ok((palette, mut errors)) = result {
+                        palettes.push(palette);
+                        warnings.append(&mut errors);
+                    } else {
+                        warnings.push(result.unwrap_err());
+                    }
                 }
-                rooms.push(Room::from(segment.as_str()));
-            } else if segment.starts_with("TIL ") {
-                tiles.push(Tile::from(segment.as_str()));
-            } else if segment.starts_with("SPR ") {
-                let result = Sprite::from_str(&segment);
-
-                if let Ok(sprite) = result {
-                    avatar_exists |= sprite.id == "A";
-
-                    sprites.push(sprite);
-                } else {
-                    warnings.push(result.unwrap_err());
+                "ROOM" | "SET" => {
+                    if segment.starts_with("SET ") {
+                        room_type = RoomType::Set;
+                    }
+                    rooms.push(Room::from(segment.as_str()));
                 }
-            } else if segment.starts_with("ITM ") {
-                let result = Item::from_str(&segment);
-
-                if let Ok(item) = result {
-                    items.push(item);
-                } else {
-                    warnings.push(result.unwrap_err());
+                "TIL" => {
+                    tiles.push(Tile::from(segment.as_str()));
                 }
-            } else if segment.starts_with("DLG ") {
-                let result = Dialogue::from_str(&segment);
-
-                if let Ok(dialogue) = result {
-                    dialogues.push(dialogue);
-                } else {
-                    warnings.push(result.unwrap_err());
+                "SPR" => {
+                    let result = Sprite::from_str(&segment);
+                    if let Ok(sprite) = result {
+                        avatar_exists |= sprite.id == "A";
+                        sprites.push(sprite);
+                    } else {
+                        warnings.push(result.unwrap_err());
+                    }
                 }
-            } else if segment.starts_with("END ") {
-                let result = Ending::from_str(&segment);
-
-                if let Ok(ending) = result {
-                    endings.push(ending);
-                } else {
-                    warnings.push(result.unwrap_err());
+                "ITM" => {
+                    let result = Item::from_str(&segment);
+                    if let Ok(item) = result {
+                        items.push(item);
+                    } else {
+                        warnings.push(result.unwrap_err());
+                    }
                 }
-            } else if segment.starts_with("VAR ") {
-                variables.push(Variable::from(segment.as_str()));
-            } else if segment.starts_with("FONT ") {
-                font_data = Some(segment);
+                "DLG" => {
+                    let result = Dialogue::from_str(&segment);
+                    if let Ok(dialogue) = result {
+                        dialogues.push(dialogue);
+                    } else {
+                        warnings.push(result.unwrap_err());
+                    }
+                }
+                "END" => {
+                    let result = Ending::from_str(&segment);
+                    if let Ok(ending) = result {
+                        endings.push(ending);
+                    } else {
+                        warnings.push(result.unwrap_err());
+                    }
+                }
+                "VAR" => {
+                    variables.push(Variable::from(segment.as_str()));
+                }
+                "FONT" => {
+                    font_data = Some(segment);
+                }
+                _ => {}
             }
         }
 
