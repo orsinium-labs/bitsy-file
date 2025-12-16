@@ -485,7 +485,7 @@ impl Game {
                 .map(|instance| {
                     if item_id_changes.contains_key(&instance.id) {
                         Instance {
-                            position: instance.position.clone(),
+                            position: instance.position,
                             id: item_id_changes[&instance.id].clone(),
                         }
                     } else {
