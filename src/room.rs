@@ -1,7 +1,6 @@
 use crate::*;
 use alloc::{borrow::ToOwned, string::ToString};
 use core::str::FromStr;
-use hashbrown::HashMap;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Room {
@@ -221,15 +220,6 @@ impl Room {
             endings,
             self.palette_line()
         )
-    }
-
-    /// "changes" is a hash of old -> new tile IDs
-    pub fn change_tile_ids(&mut self, changes: &HashMap<String, String>) {
-        self.tiles = self
-            .tiles
-            .iter()
-            .map(|tile_id| changes.get(tile_id).unwrap_or(tile_id).clone())
-            .collect();
     }
 }
 

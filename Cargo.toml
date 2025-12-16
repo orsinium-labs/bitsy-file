@@ -11,4 +11,3 @@ keywords = ["gamedev", "bitsy", "nostd"]
 categories = ["no-std"]
 
 [dependencies]
-hashbrown = "0.16"
