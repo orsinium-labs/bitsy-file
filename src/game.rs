@@ -312,6 +312,10 @@ impl Game {
         self.tiles.iter().find(|tile| tile.id == id)
     }
 
+    pub fn get_item(&self, id: &str) -> Option<&Item> {
+        self.items.iter().find(|item| item.id == id)
+    }
+
     pub fn get_room(&self, id: &str) -> Option<&Room> {
         self.rooms.iter().find(|room| room.id == id)
     }

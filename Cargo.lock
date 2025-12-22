@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "bitsy-nostd-parser"
+name = "bitsy-reparser"
 version = "0.711.0"

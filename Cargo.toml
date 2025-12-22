@@ -1,13 +1,24 @@
 [package]
-name = "bitsy-nostd-parser"
+name = "bitsy-reparser"
 version = "0.711.0"
-authors = ["Gram <git@orsinium.dev>", "Max Bradbury <max@tinybird.info>"]
+authors = [
+    # current maintainer of the fork
+    "Gram <git@orsinium.dev>",
+    # the original project creator
+    "Max Bradbury <max@tinybird.info>",
+]
 edition = "2021"
 description = "A parser and utilities for working with Bitsy game data"
 readme = "README.md"
 repository = "https://github.com/orsinium-labs/bitsy-nostd-parser"
 license = "MIT"
 keywords = ["gamedev", "bitsy", "nostd"]
-categories = ["no-std"]
+categories = [
+    "compilers",
+    "no-std",
+    "game-engines",
+    "parsing",
+    "parser-implementations",
+]
 
 [dependencies]
