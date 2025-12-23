@@ -1,9 +1,10 @@
 use alloc::string::String;
 use alloc::string::ToString;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum Font {
-    AsciiSmall, // default - does not appear in game data
+    #[default]
+    AsciiSmall,
     UnicodeEuropeanSmall,
     UnicodeEuropeanLarge,
     UnicodeAsian,
@@ -33,8 +34,9 @@ impl Font {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum TextDirection {
-    LeftToRight, // default
+    #[default]
+    LeftToRight,
     RightToLeft,
 }

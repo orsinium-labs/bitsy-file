@@ -40,8 +40,9 @@ impl fmt::Display for RoomFormat {
 }
 
 /// in very early versions of Bitsy, a room was called a "set"
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+#[derive(Debug, Default, Eq, PartialEq, Copy, Clone)]
 pub enum RoomType {
+    #[default]
     Room,
     Set,
 }
@@ -101,7 +102,7 @@ impl Version {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Game {
     pub name: String,
     pub version: Option<Version>,
@@ -128,63 +129,47 @@ impl Game {
             return Err(crate::error::NotFound::Anything);
         }
 
-        let mut game = Game {
-            name: String::new(),
-            version: None,
-            room_format: None,
-            room_type: RoomType::Room,
-            font: Font::AsciiSmall,
-            custom_font: None,
-            text_direction: TextDirection::LeftToRight,
-            palettes: Vec::new(),
-            rooms: Vec::new(),
-            tiles: Vec::new(),
-            sprites: Vec::new(),
-            items: Vec::new(),
-            dialogues: Vec::new(),
-            endings: Vec::new(),
-            variables: Vec::new(),
-            font_data: None,
-            warnings: Vec::new(),
-        };
-
+        let mut game = Game::default();
         let segments = Segments::new(string);
         for segment in segments {
-            match segment {
-                Segment::Name(name) => game.name = name,
-                Segment::Version(version) => game.version = Some(version),
-                Segment::RoomFormat(room_format) => game.room_format = Some(room_format),
-                Segment::Font(font, data) => {
-                    game.font = font;
-                    if let Some(data) = data {
-                        game.custom_font = Some(data);
-                    }
-                }
-                Segment::TextDirection(text_direction) => game.text_direction = text_direction,
-                Segment::Palette(palette) => game.palettes.push(palette),
-                Segment::Room(room, room_type) => {
-                    if room_type == RoomType::Set {
-                        game.room_type = room_type;
-                    }
-                    game.rooms.push(room)
-                }
-                Segment::Tile(tile) => game.tiles.push(tile),
-                Segment::Sprite(sprite) => game.sprites.push(sprite),
-                Segment::Item(item) => game.items.push(item),
-                Segment::Dialogue(dialogue) => game.dialogues.push(dialogue),
-                Segment::Ending(ending) => game.endings.push(ending),
-                Segment::Variable(variable) => game.variables.push(variable),
-                Segment::FontData(data) => game.font_data = Some(data),
-                Segment::Warning(error) => game.warnings.push(error),
-            };
+            game.push_segment(segment)
         }
-
         // if !avatar_exists {
         //     warnings.push(crate::Error::Game {
         //         missing: NotFound::Avatar,
         //     });
         // }
         Ok(game)
+    }
+
+    pub fn push_segment(&mut self, segment: Segment) {
+        match segment {
+            Segment::Name(name) => self.name = name,
+            Segment::Version(version) => self.version = Some(version),
+            Segment::RoomFormat(room_format) => self.room_format = Some(room_format),
+            Segment::Font(font, data) => {
+                self.font = font;
+                if let Some(data) = data {
+                    self.custom_font = Some(data);
+                }
+            }
+            Segment::TextDirection(text_direction) => self.text_direction = text_direction,
+            Segment::Palette(palette) => self.palettes.push(palette),
+            Segment::Room(room, room_type) => {
+                if room_type == RoomType::Set {
+                    self.room_type = room_type;
+                }
+                self.rooms.push(room)
+            }
+            Segment::Tile(tile) => self.tiles.push(tile),
+            Segment::Sprite(sprite) => self.sprites.push(sprite),
+            Segment::Item(item) => self.items.push(item),
+            Segment::Dialogue(dialogue) => self.dialogues.push(dialogue),
+            Segment::Ending(ending) => self.endings.push(ending),
+            Segment::Variable(variable) => self.variables.push(variable),
+            Segment::FontData(data) => self.font_data = Some(data),
+            Segment::Warning(error) => self.warnings.push(error),
+        };
     }
 
     pub fn get_sprite(&self, id: &str) -> Option<&Sprite> {
