@@ -1,5 +1,5 @@
 [package]
-name = "bitsy-reparser"
+name = "bitsy-file"
 version = "0.711.0"
 authors = [
     # current maintainer of the fork
