@@ -6,56 +6,41 @@ use alloc::string::ToString;
 use alloc::{format, string::String, vec, vec::Vec};
 use core::fmt::Display;
 
-pub mod colour;
-pub mod dialogue;
-pub mod ending;
-pub mod error;
-pub mod exit;
-pub mod game;
-pub mod image;
-pub mod item;
+mod colour;
+mod dialogue;
+mod ending;
+mod error;
+mod exit;
+mod game;
+mod image;
+mod instance;
+mod item;
 pub mod mock;
-pub mod palette;
-pub mod position;
-pub mod room;
-pub mod sprite;
-pub mod test_omnibus;
-pub mod text;
-pub mod tile;
-pub mod variable;
+mod palette;
+mod position;
+mod room;
+mod sprite;
+mod test_omnibus;
+mod text;
+mod tile;
+mod variable;
 
-pub use colour::Colour;
-pub use dialogue::Dialogue;
-pub use ending::Ending;
-pub use error::Error;
+pub use colour::*;
+pub use dialogue::*;
+pub use ending::*;
+pub use error::*;
 pub use exit::*;
 pub use game::*;
-pub use image::Image;
-pub use item::Item;
-pub use palette::Palette;
-pub use position::Position;
-pub use room::Room;
-pub use sprite::Sprite;
+pub use image::*;
+pub use instance::*;
+pub use item::*;
+pub use palette::*;
+pub use position::*;
+pub use room::*;
+pub use sprite::*;
 pub use text::*;
-pub use tile::Tile;
-pub use variable::Variable;
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Instance {
-    pub position: Position,
-    pub id: String, // item / ending id
-}
-
-/// a Room can have many Exits in different positions,
-/// optionally with a transition and dialogue
-/// todo make a from_str() function for this
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ExitInstance {
-    pub position: Position,
-    pub exit: Exit,
-    pub transition: Option<Transition>,
-    pub dialogue_id: Option<String>,
-}
+pub use tile::*;
+pub use variable::*;
 
 pub trait AnimationFrames {
     fn to_string(&self) -> String;
