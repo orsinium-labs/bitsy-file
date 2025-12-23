@@ -1,10 +1,8 @@
-use crate::error::NotFound;
 use crate::*;
 use alloc::borrow::ToOwned;
 use alloc::string::ToString;
 use alloc::{format, string::String, vec::Vec};
 use core::fmt;
-use core::str::FromStr;
 
 /// in very early versions of Bitsy, room tiles were defined as single alphanumeric characters -
 /// so there was a maximum of 36 unique tiles. later versions are comma-separated.
@@ -19,7 +17,7 @@ pub enum RoomFormat {
 pub struct InvalidRoomFormat;
 
 impl RoomFormat {
-    fn from(str: &str) -> Result<RoomFormat, InvalidRoomFormat> {
+    pub fn from(str: &str) -> Result<RoomFormat, InvalidRoomFormat> {
         match str {
             "0" => Ok(RoomFormat::Contiguous),
             "1" => Ok(RoomFormat::CommaSeparated),
@@ -88,7 +86,7 @@ impl fmt::Display for VersionError {
 impl core::error::Error for VersionError {}
 
 impl Version {
-    fn from(str: &str) -> Result<Version, VersionError> {
+    pub fn new(str: &str) -> Result<Version, VersionError> {
         let parts: Vec<&str> = str.split('.').collect();
 
         if parts.len() < 2 {
@@ -121,187 +119,72 @@ pub struct Game {
     pub endings: Vec<Ending>,
     pub variables: Vec<Variable>,
     pub font_data: Option<String>, // todo make this an actual struct for parsing
+    pub warnings: Vec<crate::Error>,
 }
 
 impl Game {
-    pub fn from(string: &str) -> Result<(Game, Vec<crate::Error>), crate::error::NotFound> {
+    pub fn from(string: &str) -> Result<Game, crate::error::NotFound> {
         if string.trim() == "" {
             return Err(crate::error::NotFound::Anything);
         }
-        let string = string.replace("\r\n", "\n");
-        let string = string.trim_start_matches('\n').to_string();
-        let mut segments = crate::segments_from_str(&string);
 
-        let mut name = "".to_string();
+        let mut game = Game {
+            name: String::new(),
+            version: None,
+            room_format: None,
+            room_type: RoomType::Room,
+            font: Font::AsciiSmall,
+            custom_font: None,
+            text_direction: TextDirection::LeftToRight,
+            palettes: Vec::new(),
+            rooms: Vec::new(),
+            tiles: Vec::new(),
+            sprites: Vec::new(),
+            items: Vec::new(),
+            dialogues: Vec::new(),
+            endings: Vec::new(),
+            variables: Vec::new(),
+            font_data: None,
+            warnings: Vec::new(),
+        };
 
-        // game names can be empty - so when we strip out the leading whitespace above,
-        // it means that the first segment might not be the game name.
-        // so, check if the first segment is actually the next segment of game data
-        // to avoid setting the game name to "# BITSY VERSION 7.0" or something
-        if segments[0].starts_with("\"\"\"") // multi-line game name
-            ||
-            (
-                ! segments[0].starts_with("# BITSY VERSION ")
-                &&
-                ! segments[0].starts_with("! ROOM_FORMAT ")
-                &&
-                ! segments[0].starts_with("PAL ")
-                &&
-                ! segments[0].starts_with("DEFAULT_FONT ")
-                &&
-                ! segments[0].starts_with("TEXT_DIRECTION ")
-            )
-        {
-            name = segments[0].to_string();
-            segments = segments[1..].to_owned();
-        }
-
-        let segments = segments;
-
-        let name = name;
-        let mut dialogues: Vec<Dialogue> = Vec::new();
-        let mut endings: Vec<Ending> = Vec::new();
-        let mut variables: Vec<Variable> = Vec::new();
-        let mut font_data: Option<String> = None;
-
-        let mut version = None;
-        let mut room_format = None;
-        let mut room_type = RoomType::Room;
-        let mut font = Font::AsciiSmall;
-        let mut custom_font = None;
-        let mut text_direction = TextDirection::LeftToRight;
-        let mut palettes: Vec<Palette> = Vec::new();
-        let mut rooms: Vec<Room> = Vec::new();
-        let mut tiles: Vec<Tile> = Vec::new();
-        let mut sprites: Vec<Sprite> = Vec::new();
-        let mut items: Vec<Item> = Vec::new();
-        let mut avatar_exists = false;
-
-        let mut warnings = Vec::new();
+        let segments = Segments::new(string);
         for segment in segments {
-            if segment.starts_with("# BITSY VERSION") {
-                let segment = segment.replace("# BITSY VERSION ", "");
-                let result = Version::from(&segment);
-
-                if let Ok(v) = result {
-                    version = Some(v);
-                } else {
-                    warnings.push(Error::Version);
+            match segment {
+                Segment::Name(name) => game.name = name,
+                Segment::Version(version) => game.version = Some(version),
+                Segment::RoomFormat(room_format) => game.room_format = Some(room_format),
+                Segment::Font(font, data) => {
+                    game.font = font;
+                    if let Some(data) = data {
+                        game.custom_font = Some(data);
+                    }
                 }
-                continue;
-            }
-            if segment.starts_with("! ROOM_FORMAT") {
-                let segment = segment.replace("! ROOM_FORMAT ", "");
-                room_format =
-                    Some(RoomFormat::from(&segment).unwrap_or(RoomFormat::CommaSeparated));
-                continue;
-            }
-            let Some((first_word, _)) = segment.split_once(' ') else {
-                continue;
+                Segment::TextDirection(text_direction) => game.text_direction = text_direction,
+                Segment::Palette(palette) => game.palettes.push(palette),
+                Segment::Room(room, room_type) => {
+                    if room_type == RoomType::Set {
+                        game.room_type = room_type;
+                    }
+                    game.rooms.push(room)
+                }
+                Segment::Tile(tile) => game.tiles.push(tile),
+                Segment::Sprite(sprite) => game.sprites.push(sprite),
+                Segment::Item(item) => game.items.push(item),
+                Segment::Dialogue(dialogue) => game.dialogues.push(dialogue),
+                Segment::Ending(ending) => game.endings.push(ending),
+                Segment::Variable(variable) => game.variables.push(variable),
+                Segment::FontData(data) => game.font_data = Some(data),
+                Segment::Warning(error) => game.warnings.push(error),
             };
-            match first_word {
-                "DEFAULT_FONT" => {
-                    let segment = segment.replace("DEFAULT_FONT ", "");
-
-                    font = Font::from(&segment);
-
-                    if font == Font::Custom {
-                        custom_font = Some(segment.to_string());
-                    }
-                }
-                "TEXT_DIRECTION" => {
-                    if segment.trim() == "TEXT_DIRECTION RTL" {
-                        text_direction = TextDirection::RightToLeft;
-                    }
-                }
-                "PAL" => {
-                    let result = Palette::from_str(&segment);
-                    if let Ok((palette, mut errors)) = result {
-                        palettes.push(palette);
-                        warnings.append(&mut errors);
-                    } else {
-                        warnings.push(result.unwrap_err());
-                    }
-                }
-                "ROOM" | "SET" => {
-                    if segment.starts_with("SET ") {
-                        room_type = RoomType::Set;
-                    }
-                    rooms.push(Room::from(segment.as_str()));
-                }
-                "TIL" => {
-                    tiles.push(Tile::from(segment.as_str()));
-                }
-                "SPR" => {
-                    let result = Sprite::from_str(&segment);
-                    if let Ok(sprite) = result {
-                        avatar_exists |= sprite.id == "A";
-                        sprites.push(sprite);
-                    } else {
-                        warnings.push(result.unwrap_err());
-                    }
-                }
-                "ITM" => {
-                    let result = Item::from_str(&segment);
-                    if let Ok(item) = result {
-                        items.push(item);
-                    } else {
-                        warnings.push(result.unwrap_err());
-                    }
-                }
-                "DLG" => {
-                    let result = Dialogue::from_str(&segment);
-                    if let Ok(dialogue) = result {
-                        dialogues.push(dialogue);
-                    } else {
-                        warnings.push(result.unwrap_err());
-                    }
-                }
-                "END" => {
-                    let result = Ending::from_str(&segment);
-                    if let Ok(ending) = result {
-                        endings.push(ending);
-                    } else {
-                        warnings.push(result.unwrap_err());
-                    }
-                }
-                "VAR" => {
-                    variables.push(Variable::from(segment.as_str()));
-                }
-                "FONT" => {
-                    font_data = Some(segment);
-                }
-                _ => {}
-            }
         }
 
-        if !avatar_exists {
-            warnings.push(crate::Error::Game {
-                missing: NotFound::Avatar,
-            });
-        }
-
-        Ok((
-            Game {
-                name,
-                version,
-                room_format,
-                room_type,
-                font,
-                custom_font,
-                text_direction,
-                palettes,
-                rooms,
-                tiles,
-                sprites,
-                items,
-                dialogues,
-                endings,
-                variables,
-                font_data,
-            },
-            warnings,
-        ))
+        // if !avatar_exists {
+        //     warnings.push(crate::Error::Game {
+        //         missing: NotFound::Avatar,
+        //     });
+        // }
+        Ok(game)
     }
 
     pub fn get_sprite(&self, id: &str) -> Option<&Sprite> {
@@ -665,6 +548,19 @@ fn new_unique_id(ids: &[String]) -> String {
     to_base36(new_id)
 }
 
+fn to_base36(mut x: u32) -> String {
+    let mut result = Vec::new();
+    loop {
+        let m = x % 36;
+        x /= 36;
+        result.push(core::char::from_digit(m, 36).unwrap());
+        if x == 0 {
+            break;
+        }
+    }
+    result.into_iter().rev().collect()
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -675,7 +571,7 @@ mod test {
 
     #[test]
     fn game_from_string() {
-        let (output, _) = Game::from(include_str!["test-resources/default.bitsy"]).unwrap();
+        let output = Game::from(include_str!["test-resources/default.bitsy"]).unwrap();
         let expected = crate::mock::game_default();
 
         assert_eq!(output, expected);
@@ -741,8 +637,7 @@ mod test {
 
     #[test]
     fn arabic() {
-        let (game, _) = Game::from(include_str!("test-resources/arabic.bitsy")).unwrap();
-
+        let game = Game::from(include_str!("test-resources/arabic.bitsy")).unwrap();
         assert_eq!(game.font, Font::Arabic);
         assert_eq!(game.text_direction, TextDirection::RightToLeft);
     }
@@ -847,20 +742,6 @@ mod test {
     fn test_optional_data_line() {
         let output = optional_data_line("NAME", mock::item().name);
         assert_eq!(output, "\nNAME door");
-    }
-
-    #[test]
-    fn string_to_segments() {
-        let output = segments_from_str(include_str!("./test-resources/segments"));
-
-        let expected = vec![
-            "\"\"\"\nthe first segment is a long bit of text\n\n\nit contains empty lines\n\n\"\"\"".to_string(),
-            "this is a new segment\nthis is still the second segment\nblah\nblah".to_string(),
-            "DLG SEGMENT_3\n\"\"\"\nthis is a short \"long\" bit of text\n\"\"\"".to_string(),
-            "this is the last segment".to_string(),
-        ];
-
-        assert_eq!(output, expected);
     }
 
     #[test]

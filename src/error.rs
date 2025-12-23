@@ -1,6 +1,6 @@
 use core::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum NotFound {
     Anything,
     Avatar,
@@ -27,7 +27,7 @@ impl fmt::Display for NotFound {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Error {
     Colour,
     Dialogue,

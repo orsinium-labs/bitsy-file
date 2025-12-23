@@ -50,7 +50,7 @@ mod test {
     fn str(s: &str, id: &str) {
         let result = Game::from(s);
         assert!(result.is_ok());
-        let (game, _) = result.expect("failed to parse game");
+        let game = result.expect("failed to parse game");
         if ACCEPTED_FAILURES.contains(&id) {
             return;
         }

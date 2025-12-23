@@ -1,6 +1,7 @@
 use crate::game::{RoomFormat, RoomType};
 use crate::*;
 use alloc::string::ToString;
+use alloc::vec;
 
 pub mod image {
     use crate::Image;
@@ -497,6 +498,7 @@ pub fn game_default() -> Game {
         room_type: RoomType::Room,
         font: Font::AsciiSmall,
         custom_font: None,
+        warnings: Vec::new(),
         text_direction: TextDirection::LeftToRight,
         palettes: vec![Palette {
             id: "0".to_string(),
