@@ -27,6 +27,7 @@ pub struct Segments {
 }
 
 impl Segments {
+    #[must_use]
     pub fn new(string: &str) -> Self {
         let string = string.replace("\r\n", "\n");
         let string = string.trim_start_matches('\n').to_string();
@@ -35,6 +36,16 @@ impl Segments {
             parts,
             emitted_name: false,
         }
+    }
+
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.parts.len()
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.parts.is_empty()
     }
 
     fn find_name(&mut self) -> Option<String> {
