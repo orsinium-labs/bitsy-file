@@ -11,6 +11,7 @@ mod dialogue;
 mod ending;
 mod error;
 mod exit;
+mod frames;
 mod game;
 mod image;
 mod instance;
@@ -30,6 +31,7 @@ pub use dialogue::*;
 pub use ending::*;
 pub use error::*;
 pub use exit::*;
+pub use frames::*;
 pub use game::*;
 pub use image::*;
 pub use instance::*;
@@ -41,27 +43,6 @@ pub use sprite::*;
 pub use text::*;
 pub use tile::*;
 pub use variable::*;
-
-pub trait AnimationFrames {
-    fn to_string(&self) -> String;
-}
-
-impl AnimationFrames for Vec<Image> {
-    fn to_string(&self) -> String {
-        let mut string = String::new();
-        let last_frame = self.len() - 1;
-
-        for (i, frame) in self.iter().enumerate() {
-            string.push_str(&frame.to_string());
-
-            if i < last_frame {
-                string.push_str("\n>\n");
-            }
-        }
-
-        string
-    }
-}
 
 fn to_base36(mut x: u32) -> String {
     let mut result = Vec::new();
@@ -138,26 +119,6 @@ fn new_unique_id(ids: &[String]) -> String {
     to_base36(new_id)
 }
 
-pub trait Quote {
-    fn quote(&self) -> String;
-}
-
-impl Quote for String {
-    fn quote(&self) -> String {
-        format!("\"\"\"\n{}\n\"\"\"", self)
-    }
-}
-
-pub trait Unquote {
-    fn unquote(&self) -> String;
-}
-
-impl Unquote for String {
-    fn unquote(&self) -> String {
-        self.trim_matches('\"').trim_matches('\n').to_string()
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -184,20 +145,6 @@ mod test {
             "this is the last segment".to_string(),
         ];
 
-        assert_eq!(output, expected);
-    }
-
-    #[test]
-    fn quote() {
-        let output = "this is a string.\nIt has 2 lines".to_string().quote();
-        let expected = "\"\"\"\nthis is a string.\nIt has 2 lines\n\"\"\"";
-        assert_eq!(output, expected);
-    }
-
-    #[test]
-    fn unquote() {
-        let output = "\"\"\"\nwho the fuck is scraeming \"LOG OFF\" at my house.\nshow yourself, coward.\ni will never log off\n\"\"\"".to_string().unquote();
-        let expected = "who the fuck is scraeming \"LOG OFF\" at my house.\nshow yourself, coward.\ni will never log off";
         assert_eq!(output, expected);
     }
 
