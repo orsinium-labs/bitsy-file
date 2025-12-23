@@ -137,30 +137,21 @@ fn parse_segment(segment: String) -> Option<Segment> {
             Some(Segment::Tile(tile))
         }
         "SPR" => match Sprite::from_str(&segment) {
-            Ok(sprite) => {
-                // avatar_exists |= sprite.id == "A";
-                Some(Segment::Sprite(sprite))
-            }
+            Ok(sprite) => Some(Segment::Sprite(sprite)),
             Err(err) => Some(Segment::Warning(err)),
         },
         "ITM" => match Item::from_str(&segment) {
             Ok(item) => Some(Segment::Item(item)),
             Err(err) => Some(Segment::Warning(err)),
         },
-        "DLG" => {
-            let result = Dialogue::from_str(&segment);
-            match result {
-                Ok(dialogue) => Some(Segment::Dialogue(dialogue)),
-                Err(err) => Some(Segment::Warning(err)),
-            }
-        }
-        "END" => {
-            let result = Ending::from_str(&segment);
-            match result {
-                Ok(ending) => Some(Segment::Ending(ending)),
-                Err(err) => Some(Segment::Warning(err)),
-            }
-        }
+        "DLG" => match Dialogue::from_str(&segment) {
+            Ok(dialogue) => Some(Segment::Dialogue(dialogue)),
+            Err(err) => Some(Segment::Warning(err)),
+        },
+        "END" => match Ending::from_str(&segment) {
+            Ok(ending) => Some(Segment::Ending(ending)),
+            Err(err) => Some(Segment::Warning(err)),
+        },
         "VAR" => Some(Segment::Variable(Variable::from(segment.as_str()))),
         "FONT" => Some(Segment::FontData(segment)),
         _ => None,

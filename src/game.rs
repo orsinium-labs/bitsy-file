@@ -134,11 +134,12 @@ impl Game {
         for segment in segments {
             game.push_segment(segment)
         }
-        // if !avatar_exists {
-        //     warnings.push(crate::Error::Game {
-        //         missing: NotFound::Avatar,
-        //     });
-        // }
+        let has_avatar = game.sprites.iter().any(|t| t.id == "A");
+        if !has_avatar {
+            game.warnings.push(crate::Error::Game {
+                missing: NotFound::Avatar,
+            });
+        }
         Ok(game)
     }
 
