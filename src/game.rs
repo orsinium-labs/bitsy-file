@@ -641,9 +641,33 @@ impl Game {
     }
 }
 
+/// tries to use an existing ID - if it is already in use, generate a new one
+/// then return the ID (either original or new)
+/// todo refactor (unnecessary clones etc.)
+fn try_id(ids: &[String], id: &str) -> String {
+    if is_id_available(ids, id) {
+        id.to_string()
+    } else {
+        new_unique_id(ids)
+    }
+}
+
+fn is_id_available(ids: &[String], id: &str) -> bool {
+    !ids.iter().any(|v| v == id)
+}
+
+/// e.g. pass all tile IDs into this to get a new non-conflicting tile ID
+fn new_unique_id(ids: &[String]) -> String {
+    let mut new_id: u32 = 0;
+    while ids.contains(&to_base36(new_id)) {
+        new_id += 1;
+    }
+    to_base36(new_id)
+}
+
 #[cfg(test)]
 mod test {
-    use crate::{Colour, Font, Game, Image, Palette, TextDirection, Tile, Version};
+    use super::*;
     use alloc::format;
     use alloc::string::ToString;
     use alloc::vec;
@@ -812,5 +836,67 @@ mod test {
         );
         assert_eq!(game.get_palette("1").unwrap(), &new_palette);
         assert_eq!(game.get_palette("2"), None);
+    }
+
+    #[test]
+    fn test_to_base36() {
+        assert_eq!(to_base36(37), "11");
+    }
+
+    #[test]
+    fn test_optional_data_line() {
+        let output = optional_data_line("NAME", mock::item().name);
+        assert_eq!(output, "\nNAME door");
+    }
+
+    #[test]
+    fn string_to_segments() {
+        let output = segments_from_str(include_str!("./test-resources/segments"));
+
+        let expected = vec![
+            "\"\"\"\nthe first segment is a long bit of text\n\n\nit contains empty lines\n\n\"\"\"".to_string(),
+            "this is a new segment\nthis is still the second segment\nblah\nblah".to_string(),
+            "DLG SEGMENT_3\n\"\"\"\nthis is a short \"long\" bit of text\n\"\"\"".to_string(),
+            "this is the last segment".to_string(),
+        ];
+
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_try_id() {
+        // does a conflict generate a new ID?
+        assert_eq!(try_id(&["0".to_string(), "1".to_string()], "1"), "2");
+        // with no conflict, does the ID remain the same?
+        assert_eq!(try_id(&["0".to_string(), "1".to_string()], "3"), "3");
+    }
+
+    #[test]
+    fn test_new_unique_id() {
+        // start
+        assert_eq!(
+            new_unique_id(&["1".to_string(), "z".to_string()]),
+            "0".to_string()
+        );
+        // middle
+        assert_eq!(
+            new_unique_id(&["0".to_string(), "2".to_string()]),
+            "1".to_string()
+        );
+        // end
+        assert_eq!(
+            new_unique_id(&["0".to_string(), "1".to_string()]),
+            "2".to_string()
+        );
+        // check sorting
+        assert_eq!(
+            new_unique_id(&["1".to_string(), "0".to_string()]),
+            "2".to_string()
+        );
+        // check deduplication
+        assert_eq!(
+            new_unique_id(&["0".to_string(), "0".to_string(), "1".to_string()]),
+            "2".to_string()
+        );
     }
 }
