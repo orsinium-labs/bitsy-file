@@ -1,14 +1,14 @@
 [package]
 name = "bitsy-file"
-version = "0.711.0"
+version = "0.712.0"
 authors = [
     # current maintainer of the fork
     "Gram <git@orsinium.dev>",
     # the original project creator
     "Max Bradbury <max@tinybird.info>",
 ]
-edition = "2021"
-description = "A parser and utilities for working with Bitsy game data"
+edition = "2024"
+description = "A parser for Bitsy game files"
 readme = "README.md"
 repository = "https://github.com/orsinium-labs/bitsy-file"
 license = "MIT"
