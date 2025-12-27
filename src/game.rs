@@ -570,11 +570,11 @@ mod test {
         assert_eq!(output, expected);
     }
 
-    // #[test]
-    // fn bitsy_v8_14() {
-    //     let given = include_str!["test-resources/default-v8.14.bitsy"];
-    //     Game::from(given).unwrap();
-    // }
+    #[test]
+    fn bitsy_v8_14() {
+        let given = include_str!["test-resources/default-v8.14.bitsy"];
+        Game::from(given).unwrap();
+    }
 
     #[test]
     fn tile_ids() {

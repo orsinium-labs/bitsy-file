@@ -1,5 +1,4 @@
-use crate::image::animation_frames_from_str;
-use crate::{AnimationFrames, Image, Position, optional_data_line};
+use crate::*;
 use alloc::string::ToString;
 use alloc::{format, string::String, vec::Vec};
 use core::fmt;
@@ -80,10 +79,16 @@ impl FromStr for Sprite {
             animation_frames: Vec::new(),
         };
 
-        let mut lines: Vec<_> = lines.collect();
+        {
+            let image = Image::from_lines(&mut lines)?;
+            sprite.animation_frames.push(image);
+        }
+
         loop {
-            let last_line = lines.pop().unwrap();
-            let (first_word, rest) = last_line.split_once(' ').unwrap_or_default();
+            let Some(line) = lines.next() else {
+                break;
+            };
+            let (first_word, rest) = line.split_once(' ').unwrap_or((line, ""));
             match first_word {
                 "NAME" => {
                     sprite.name = Some(rest.to_string());
@@ -111,15 +116,13 @@ impl FromStr for Sprite {
                 "ITM" => {
                     sprite.items.push(rest.to_string());
                 }
-                _ => {
-                    lines.push(last_line);
-                    break;
+                ">" => {
+                    let image = Image::from_lines(&mut lines)?;
+                    sprite.animation_frames.push(image);
                 }
+                _ => {}
             }
         }
-
-        sprite.items.reverse();
-        sprite.animation_frames = animation_frames_from_str(&lines.join("\n"));
         Ok(sprite)
     }
 }
