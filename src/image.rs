@@ -1,5 +1,6 @@
 use alloc::{format, string::String, vec::Vec};
 use core::fmt;
+use core::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Image {
@@ -53,11 +54,7 @@ impl Image {
         self.pixels = pixels;
     }
 
-    fn from_str(str: &str) -> Result<Image, crate::Error> {
-        Self::from_lines(str.trim().lines())
-    }
-
-    fn from_lines<'a, I>(lines: I) -> Result<Image, crate::Error>
+    pub fn from_lines<'a, I>(lines: I) -> Result<Image, crate::Error>
     where
         I: Iterator<Item = &'a str>,
     {
@@ -80,6 +77,13 @@ impl Image {
             return Err(crate::Error::Image);
         }
         Ok(Image { pixels })
+    }
+}
+
+impl FromStr for Image {
+    type Err = crate::Error;
+    fn from_str(str: &str) -> Result<Image, Self::Err> {
+        Self::from_lines(str.trim().lines())
     }
 }
 
@@ -113,7 +117,7 @@ pub fn animation_frames_from_str(str: &str) -> Vec<Image> {
 
 #[cfg(test)]
 mod test {
-    use crate::image::{Image, animation_frames_from_str};
+    use super::*;
     use crate::mock;
     use alloc::string::ToString;
     use alloc::vec;
