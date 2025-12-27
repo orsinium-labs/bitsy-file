@@ -35,12 +35,11 @@ impl FromStr for Item {
         let Some(first_line) = lines.next() else {
             return Err(crate::Error::Sprite);
         };
-        if !first_line.starts_with("ITM ") {
+        let Some(id) = first_line.strip_prefix("ITM ") else {
             return Err(crate::Error::Sprite);
-        }
-
+        };
         let mut item = Item {
-            id: first_line.replace("ITM ", ""),
+            id: id.to_string(),
             name: None,
             dialogue_id: None,
             colour_id: None,

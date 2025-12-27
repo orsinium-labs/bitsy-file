@@ -64,12 +64,12 @@ impl FromStr for Sprite {
         let Some(first_line) = lines.next() else {
             return Err(crate::Error::Sprite);
         };
-        if !first_line.starts_with("SPR ") {
+        let Some(id) = first_line.strip_prefix("SPR ") else {
             return Err(crate::Error::Sprite);
-        }
+        };
 
         let mut sprite = Sprite {
-            id: first_line.replace("SPR ", ""),
+            id: id.to_string(),
             name: None,
             dialogue_id: None,
             room_id: None,

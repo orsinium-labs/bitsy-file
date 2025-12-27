@@ -102,11 +102,11 @@ impl FromStr for Tile {
         let Some(first_line) = lines.next() else {
             return Err(crate::Error::Tile);
         };
-        if !first_line.starts_with("TIL ") {
-            return Err(crate::Error::Tile);
-        }
+        let Some(id) = first_line.strip_prefix("TIL ") else {
+            return Err(crate::Error::Sprite);
+        };
         let mut tile = Tile {
-            id: first_line.replace("TIL ", ""),
+            id: id.to_string(),
             wall: None,
             name: None,
             colour_id: None,
