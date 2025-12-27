@@ -1,5 +1,5 @@
 use crate::*;
-use alloc::{borrow::ToOwned, string::ToString};
+use alloc::string::ToString;
 use core::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -58,12 +58,12 @@ impl From<&str> for Room {
         const DIMENSION: usize = 16;
         for line in lines.by_ref().take(DIMENSION) {
             let comma_separated = line.contains(','); // old room format?
-            let line: Vec<_> = line.split(if comma_separated { "," } else { "" }).collect();
-            let mut line = &line[..];
+            let sep = if comma_separated { "," } else { "" };
+            let mut line = line.split(sep);
             if !comma_separated {
-                line = &line[1..];
+                line.next();
             }
-            for tile_id in &line[..DIMENSION] {
+            for tile_id in line.take(DIMENSION) {
                 room.tiles.push(tile_id.to_string());
             }
         }
@@ -85,10 +85,7 @@ impl From<&str> for Room {
                 }
                 "ITM" => {
                     let last_line = last_line.replace("ITM ", "");
-                    let item_position: Vec<&str> = last_line.split(' ').collect();
-                    let item_id = item_position[0];
-                    let position = item_position[1];
-
+                    let (item_id, position) = last_line.split_once(' ').unwrap();
                     if let Ok(position) = Position::from_str(position) {
                         room.items.push(Instance {
                             position,
@@ -129,15 +126,12 @@ impl From<&str> for Room {
                 }
                 "END" => {
                     let last_line = last_line.replace("END ", "");
-                    let ending_position: Vec<&str> = last_line.split(' ').collect();
-                    let ending = ending_position[0].to_string();
-                    let position = ending_position[1];
+                    let (ending, position) = last_line.split_once(' ').unwrap();
                     let position = Position::from_str(position);
-
                     if let Ok(position) = position {
                         room.endings.push(Instance {
                             position,
-                            id: ending,
+                            id: ending.to_string(),
                         });
                     }
                 }

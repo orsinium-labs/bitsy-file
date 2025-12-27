@@ -557,18 +557,24 @@ mod test {
 
     #[test]
     fn game_from_string() {
-        let output = Game::from(include_str!["test-resources/default.bitsy"]).unwrap();
+        let given = include_str!["test-resources/default-v7.10.bitsy"];
+        let actual = Game::from(given).unwrap();
         let expected = crate::mock::game_default();
-
-        assert_eq!(output, expected);
+        assert_eq!(actual, expected);
     }
 
     #[test]
     fn game_to_string() {
         let output = crate::mock::game_default().to_string();
-        let expected = include_str!["test-resources/default.bitsy"].to_string();
+        let expected = include_str!["test-resources/default-v7.10.bitsy"].to_string();
         assert_eq!(output, expected);
     }
+
+    // #[test]
+    // fn bitsy_v8_14() {
+    //     let given = include_str!["test-resources/default-v8.14.bitsy"];
+    //     Game::from(given).unwrap();
+    // }
 
     #[test]
     fn tile_ids() {
