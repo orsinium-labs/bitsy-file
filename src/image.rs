@@ -61,12 +61,12 @@ impl Image {
         }
 
         let string = str.trim().replace("NaN", "0");
-
-        let lines: Vec<&str> = string.lines().collect();
-        let dimension = lines.len();
+        let mut dimension = 0;
         let mut pixels: Vec<u8> = Vec::new();
-
-        for line in lines {
+        for (i, line) in string.lines().enumerate() {
+            if dimension == 0 {
+                dimension = if line.len() >= 16 { 16 } else { 8 };
+            }
             let line = &line[..dimension];
             for char in line.chars() {
                 // todo push warning on integers other than 0/1
@@ -74,6 +74,9 @@ impl Image {
                     '1' => 1,
                     _ => 0,
                 });
+            }
+            if i + 1 == dimension {
+                break;
             }
         }
 
@@ -115,7 +118,7 @@ pub fn animation_frames_from_str(str: &str) -> Vec<Image> {
 
 #[cfg(test)]
 mod test {
-    use crate::image::{animation_frames_from_str, Image};
+    use crate::image::{Image, animation_frames_from_str};
     use crate::mock;
     use alloc::string::ToString;
     use alloc::vec;
