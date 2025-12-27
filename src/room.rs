@@ -43,89 +43,103 @@ impl From<&str> for Room {
         let string = string.replace("ROOM ", "");
         let string = string.replace("SET ", "");
         let mut lines: Vec<&str> = string.lines().collect();
-        let id = lines[0].to_string();
-        let mut name = None;
-        let mut palette_id = None;
-        let mut items: Vec<Instance> = Vec::new();
-        let mut exits: Vec<ExitInstance> = Vec::new();
-        let mut endings: Vec<Instance> = Vec::new();
-        let mut walls = None;
+        let mut room = Room {
+            id: lines[0].to_string(),
+            name: None,
+            palette_id: None,
+            items: Vec::new(),
+            exits: Vec::new(),
+            endings: Vec::new(),
+            tiles: Vec::new(),
+            walls: None,
+        };
 
         loop {
             let last_line = lines.pop().unwrap();
+            let Some((first_word, _)) = last_line.split_once(' ') else {
+                lines.push(last_line);
+                break;
+            };
 
-            if last_line.starts_with("WAL") {
-                let last_line = last_line.replace("WAL ", "");
-                let ids: Vec<&str> = last_line.split(',').collect();
-                walls = Some(ids.iter().map(|&id| id.to_string()).collect());
-            } else if last_line.starts_with("NAME") {
-                name = Some(last_line.replace("NAME ", "").to_string());
-            } else if last_line.starts_with("PAL") {
-                palette_id = Some(last_line.replace("PAL ", ""));
-            } else if last_line.starts_with("ITM") {
-                let last_line = last_line.replace("ITM ", "");
-                let item_position: Vec<&str> = last_line.split(' ').collect();
-                let item_id = item_position[0];
-                let position = item_position[1];
-
-                if let Ok(position) = Position::from_str(position) {
-                    items.push(Instance {
-                        position,
-                        id: item_id.to_string(),
-                    });
+            match first_word {
+                "WAL" => {
+                    let last_line = last_line.replace("WAL ", "");
+                    let ids: Vec<&str> = last_line.split(',').collect();
+                    room.walls = Some(ids.iter().map(|&id| id.to_string()).collect());
                 }
-            } else if last_line.starts_with("EXT") {
-                let last_line = last_line.replace("EXT ", "");
-                let parts: Vec<&str> = last_line.split(' ').collect();
-                let position = Position::from_str(parts[0]);
+                "NAME" => {
+                    room.name = Some(last_line.replace("NAME ", "").to_string());
+                }
+                "PAL" => {
+                    room.palette_id = Some(last_line.replace("PAL ", ""));
+                }
+                "ITM" => {
+                    let last_line = last_line.replace("ITM ", "");
+                    let item_position: Vec<&str> = last_line.split(' ').collect();
+                    let item_id = item_position[0];
+                    let position = item_position[1];
 
-                if let Ok(position) = position {
-                    let exit = Exit::from_str(&format!("{} {}", parts[1], parts[2]));
-
-                    if let Ok(exit) = exit {
-                        let mut transition = None;
-                        let mut dialogue_id = None;
-
-                        let chunks = parts[3..].chunks(2);
-
-                        for chunk in chunks {
-                            if chunk[0] == "FX" {
-                                transition = Some(Transition::from_str(chunk[1]).unwrap());
-                            } else if chunk[0] == "DLG" {
-                                dialogue_id = Some(chunk[1].to_string());
-                            }
-                        }
-
-                        exits.push(ExitInstance {
+                    if let Ok(position) = Position::from_str(position) {
+                        room.items.push(Instance {
                             position,
-                            exit,
-                            transition,
-                            dialogue_id,
+                            id: item_id.to_string(),
                         });
                     }
                 }
-            } else if last_line.starts_with("END") {
-                let last_line = last_line.replace("END ", "");
-                let ending_position: Vec<&str> = last_line.split(' ').collect();
-                let ending = ending_position[0].to_string();
-                let position = ending_position[1];
-                let position = Position::from_str(position);
+                "EXT" => {
+                    let last_line = last_line.replace("EXT ", "");
+                    let parts: Vec<&str> = last_line.split(' ').collect();
+                    let position = Position::from_str(parts[0]);
 
-                if let Ok(position) = position {
-                    endings.push(Instance {
-                        position,
-                        id: ending,
-                    });
+                    if let Ok(position) = position {
+                        let exit = Exit::from_str(&format!("{} {}", parts[1], parts[2]));
+
+                        if let Ok(exit) = exit {
+                            let mut transition = None;
+                            let mut dialogue_id = None;
+
+                            let chunks = parts[3..].chunks(2);
+
+                            for chunk in chunks {
+                                if chunk[0] == "FX" {
+                                    transition = Some(Transition::from_str(chunk[1]).unwrap());
+                                } else if chunk[0] == "DLG" {
+                                    dialogue_id = Some(chunk[1].to_string());
+                                }
+                            }
+
+                            room.exits.push(ExitInstance {
+                                position,
+                                exit,
+                                transition,
+                                dialogue_id,
+                            });
+                        }
+                    }
                 }
-            } else {
-                lines.push(last_line);
-                break;
+                "END" => {
+                    let last_line = last_line.replace("END ", "");
+                    let ending_position: Vec<&str> = last_line.split(' ').collect();
+                    let ending = ending_position[0].to_string();
+                    let position = ending_position[1];
+                    let position = Position::from_str(position);
+
+                    if let Ok(position) = position {
+                        room.endings.push(Instance {
+                            position,
+                            id: ending,
+                        });
+                    }
+                }
+                _ => {
+                    lines.push(last_line);
+                    break;
+                }
             }
         }
 
         let lines = &lines[1..];
         let dimension = lines.len(); // x or y, e.g. `16` for 16x16
-        let mut tiles: Vec<String> = Vec::new();
 
         for line in lines.iter() {
             let comma_separated = line.contains(','); // old room format?
@@ -137,24 +151,14 @@ impl From<&str> for Room {
             let line = line[..dimension].to_owned();
 
             for tile_id in line {
-                tiles.push(tile_id.to_string());
+                room.tiles.push(tile_id.to_string());
             }
         }
 
-        items.reverse();
-        exits.reverse();
-        endings.reverse();
-
-        Room {
-            id,
-            palette_id,
-            name,
-            tiles,
-            items,
-            exits,
-            endings,
-            walls,
-        }
+        room.items.reverse();
+        room.exits.reverse();
+        room.endings.reverse();
+        room
     }
 }
 
