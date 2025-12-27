@@ -42,9 +42,9 @@ impl From<&str> for Room {
     fn from(string: &str) -> Room {
         let string = string.replace("ROOM ", "");
         let string = string.replace("SET ", "");
-        let mut lines: Vec<&str> = string.lines().collect();
+        let mut lines = string.lines();
         let mut room = Room {
-            id: lines[0].to_string(),
+            id: lines.next().unwrap().to_string(),
             name: None,
             palette_id: None,
             items: Vec::new(),
@@ -54,13 +54,23 @@ impl From<&str> for Room {
             walls: None,
         };
 
-        loop {
-            let last_line = lines.pop().unwrap();
-            let Some((first_word, _)) = last_line.split_once(' ') else {
-                lines.push(last_line);
-                break;
-            };
+        // Read the first 16 lines (after ID) as tile IDs.
+        const DIMENSION: usize = 16;
+        for line in lines.by_ref().take(DIMENSION) {
+            let comma_separated = line.contains(','); // old room format?
+            let line: Vec<_> = line.split(if comma_separated { "," } else { "" }).collect();
+            let mut line = &line[..];
+            if !comma_separated {
+                line = &line[1..];
+            }
+            for tile_id in &line[..DIMENSION] {
+                room.tiles.push(tile_id.to_string());
+            }
+        }
 
+        // After tiles, read the remaining room properties.
+        for last_line in lines {
+            let (first_word, _) = last_line.split_once(' ').unwrap_or_default();
             match first_word {
                 "WAL" => {
                     let last_line = last_line.replace("WAL ", "");
@@ -131,33 +141,9 @@ impl From<&str> for Room {
                         });
                     }
                 }
-                _ => {
-                    lines.push(last_line);
-                    break;
-                }
+                _ => {}
             }
         }
-
-        let lines = &lines[1..];
-        let dimension = lines.len(); // x or y, e.g. `16` for 16x16
-
-        for line in lines.iter() {
-            let comma_separated = line.contains(','); // old room format?
-            let mut line: Vec<&str> = line.split(if comma_separated { "," } else { "" }).collect();
-
-            if !comma_separated {
-                line = line[1..].to_owned();
-            }
-            let line = line[..dimension].to_owned();
-
-            for tile_id in line {
-                room.tiles.push(tile_id.to_string());
-            }
-        }
-
-        room.items.reverse();
-        room.exits.reverse();
-        room.endings.reverse();
         room
     }
 }
