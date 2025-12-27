@@ -1,0 +1,19 @@
+"""
+the first segment is a long bit of text
+
+
+it contains empty lines
+
+"""
+
+this is a new segment
+this is still the second segment
+blah
+blah
+
+DLG SEGMENT_3
+"""
+this is a short "long" bit of text
+"""
+
+this is the last segment

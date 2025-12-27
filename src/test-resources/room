@@ -1,0 +1,26 @@
+ROOM a
+0,0,0,0,0,0,0,0,1l,0,0,0,0,0,0,0
+y,x,0,0,1j,0,0,1j,1l,0,1j,0,0,1j,0,0
+y,y,x,k,k,1c,1x,1y,1m,0,0,0,0,0,0,0
+y,y,y,x,k,s,s,s,k,k,k,k,k,1g,1f,k
+k,z,z,z,1i,1u,1u,1u,1v,11,19,1b,1a,1e,10,k
+k,z,z,11,12,z,z,z,z,10,17,z,18,1e,12,k
+k,z,z,z,z,z,z,z,z,1k,14,15,16,1h,z,k
+k,z,z,z,z,z,z,10,1d,1v,1r,1s,1r,1q,1z,k
+k,z,z,12,10,z,z,z,1i,1n,1o,1o,1o,1p,z,k
+k,z,z,z,z,z,z,z,z,z,z,z,10,z,z,k
+k,z,z,z,z,z,11,z,z,z,z,z,z,z,z,k
+k,z,z,z,z,z,z,z,z,z,12,z,z,10,12,k
+k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+NAME cellar 7
+ITM d 11,5
+ITM e 8,3
+ITM 5 1,0
+ITM 6 2,1
+ITM 6 3,2
+EXT 3,3 3 10,6
+END undefined 8,7
+PAL 9

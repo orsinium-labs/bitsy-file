@@ -1,3 +1,0 @@
-[submodule "src/test-resources/omnibus"]
-	path = src/test-resources/omnibus
-	url = https://github.com/Ragzouken/bitsy-archive.git

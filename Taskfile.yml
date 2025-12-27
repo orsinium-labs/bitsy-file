@@ -2,6 +2,16 @@
 version: "3"
 
 tasks:
+  download-omnibus:
+    status:
+      - test -f src/test-resources/omnibus/README.md
+    cmds:
+      - >
+        git clone
+        --depth 1
+        https://github.com/Ragzouken/bitsy-archive.git
+        src/test-resources/omnibus
+
   release:
     desc: build and publish release
     cmds:
@@ -19,6 +29,7 @@ tasks:
   test:
     desc: "run tests"
     cmds:
+      - task: download-omnibus
       - cargo test
   lint:
     desc: "run linters"
