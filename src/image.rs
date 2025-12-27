@@ -54,31 +54,32 @@ impl Image {
     }
 
     fn from_str(str: &str) -> Result<Image, crate::Error> {
-        let string = str.trim().replace("NaN", "0");
+        Self::from_lines(str.trim().lines())
+    }
+
+    fn from_lines<'a, I>(lines: I) -> Result<Image, crate::Error>
+    where
+        I: Iterator<Item = &'a str>,
+    {
         let mut dimension = 0;
         let mut pixels: Vec<u8> = Vec::new();
-        for (i, line) in string.lines().enumerate() {
+        for (i, line) in lines.enumerate() {
             if dimension == 0 {
                 dimension = if line.len() >= 16 { 16 } else { 8 };
             }
             let line = &line[..dimension];
             for char in line.chars() {
-                // todo push warning on integers other than 0/1
-                pixels.push(match char {
-                    '1' => 1,
-                    _ => 0,
-                });
+                pixels.push(u8::from(char == '1'));
             }
             if i + 1 == dimension {
                 break;
             }
         }
 
-        if [64, 256].contains(&pixels.len()) {
-            Ok(Image { pixels })
-        } else {
-            Err(crate::Error::Image)
+        if pixels.len() != 64 && pixels.len() != 256 {
+            return Err(crate::Error::Image);
         }
+        Ok(Image { pixels })
     }
 }
 
