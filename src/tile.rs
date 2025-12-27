@@ -1,7 +1,7 @@
-use crate::image::animation_frames_from_str;
 use crate::{AnimationFrames, Image, optional_data_line};
 use alloc::string::ToString;
 use alloc::{format, string::String, vec::Vec};
+use core::str::FromStr;
 
 #[derive(Clone, Debug, Eq)]
 pub struct Tile {
@@ -94,40 +94,53 @@ impl Tile {
     }
 }
 
-impl From<&str> for Tile {
-    fn from(string: &str) -> Tile {
-        let mut lines: Vec<&str> = string.lines().collect();
+impl FromStr for Tile {
+    type Err = crate::Error;
 
-        let id = lines[0].replace("TIL ", "");
+    fn from_str(str: &str) -> Result<Tile, crate::Error> {
+        let mut lines = str.lines();
+        let Some(first_line) = lines.next() else {
+            return Err(crate::Error::Tile);
+        };
+        if !first_line.starts_with("TIL ") {
+            return Err(crate::Error::Tile);
+        }
+        let mut tile = Tile {
+            id: first_line.replace("TIL ", ""),
+            wall: None,
+            name: None,
+            colour_id: None,
+            animation_frames: Vec::new(),
+        };
 
-        let mut wall = None;
-        let mut name = None;
-        let mut colour_id = None;
+        {
+            let image = Image::from_lines(&mut lines)?;
+            tile.animation_frames.push(image);
+        }
 
         loop {
-            let last_line = lines.pop().unwrap();
-
-            if last_line.starts_with("WAL") {
-                wall = Some(last_line.ends_with("true"));
-            } else if last_line.starts_with("NAME") {
-                name = Some(last_line.replace("NAME ", "").to_string());
-            } else if last_line.starts_with("COL") {
-                colour_id = Some(last_line.replace("COL ", "").parse().unwrap());
-            } else {
-                lines.push(last_line);
+            let Some(line) = lines.next() else {
                 break;
+            };
+            let (first_word, rest) = line.split_once(' ').unwrap_or((line, ""));
+            match first_word {
+                "WAL" => {
+                    tile.wall = Some(rest == "true");
+                }
+                "NAME" => {
+                    tile.name = Some(rest.to_string());
+                }
+                "COL" => {
+                    tile.colour_id = Some(rest.parse().unwrap());
+                }
+                ">" => {
+                    let image = Image::from_lines(&mut lines)?;
+                    tile.animation_frames.push(image);
+                }
+                _ => {}
             }
         }
-
-        let animation_frames = animation_frames_from_str(&lines[1..].join("\n"));
-
-        Tile {
-            id,
-            name,
-            wall,
-            animation_frames,
-            colour_id,
-        }
+        Ok(tile)
     }
 }
 
@@ -152,8 +165,7 @@ mod test {
 
     #[test]
     fn tile_from_string() {
-        let output = Tile::from(include_str!("test-resources/tile"));
-
+        let output = Tile::from_str(include_str!("test-resources/tile")).unwrap();
         let expected = Tile {
             id: "z".to_string(),
             name: Some("concrete 1".to_string()),

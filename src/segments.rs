@@ -143,10 +143,10 @@ fn parse_segment(segment: String) -> Option<Segment> {
             let room = Room::from(segment.as_str());
             Some(Segment::Room(room, room_type))
         }
-        "TIL" => {
-            let tile = Tile::from(segment.as_str());
-            Some(Segment::Tile(tile))
-        }
+        "TIL" => match Tile::from_str(segment.as_str()) {
+            Ok(tile) => Some(Segment::Tile(tile)),
+            Err(err) => Some(Segment::Warning(err)),
+        },
         "SPR" => match Sprite::from_str(&segment) {
             Ok(sprite) => Some(Segment::Sprite(sprite)),
             Err(err) => Some(Segment::Warning(err)),
