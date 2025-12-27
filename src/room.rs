@@ -70,22 +70,20 @@ impl From<&str> for Room {
 
         // After tiles, read the remaining room properties.
         for last_line in lines {
-            let (first_word, _) = last_line.split_once(' ').unwrap_or_default();
+            let (first_word, rest) = last_line.split_once(' ').unwrap_or_default();
             match first_word {
                 "WAL" => {
-                    let last_line = last_line.replace("WAL ", "");
-                    let ids: Vec<&str> = last_line.split(',').collect();
-                    room.walls = Some(ids.iter().map(|&id| id.to_string()).collect());
+                    let ids = rest.split(',').map(|id| id.to_string());
+                    room.walls = Some(ids.collect());
                 }
                 "NAME" => {
-                    room.name = Some(last_line.replace("NAME ", "").to_string());
+                    room.name = Some(rest.to_string());
                 }
                 "PAL" => {
-                    room.palette_id = Some(last_line.replace("PAL ", ""));
+                    room.palette_id = Some(rest.to_string());
                 }
                 "ITM" => {
-                    let last_line = last_line.replace("ITM ", "");
-                    let (item_id, position) = last_line.split_once(' ').unwrap();
+                    let (item_id, position) = rest.split_once(' ').unwrap();
                     if let Ok(position) = Position::from_str(position) {
                         room.items.push(Instance {
                             position,
@@ -94,8 +92,7 @@ impl From<&str> for Room {
                     }
                 }
                 "EXT" => {
-                    let last_line = last_line.replace("EXT ", "");
-                    let parts: Vec<&str> = last_line.split(' ').collect();
+                    let parts: Vec<_> = rest.split(' ').collect();
                     let position = Position::from_str(parts[0]);
 
                     if let Ok(position) = position {

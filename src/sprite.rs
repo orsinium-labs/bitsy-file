@@ -83,17 +83,16 @@ impl FromStr for Sprite {
         let mut lines: Vec<_> = lines.collect();
         loop {
             let last_line = lines.pop().unwrap();
-            let (first_word, _) = last_line.split_once(' ').unwrap_or_default();
+            let (first_word, rest) = last_line.split_once(' ').unwrap_or_default();
             match first_word {
                 "NAME" => {
-                    sprite.name = Some(last_line.replace("NAME ", "").to_string());
+                    sprite.name = Some(rest.to_string());
                 }
                 "DLG" => {
-                    sprite.dialogue_id = Some(last_line.replace("DLG ", "").to_string());
+                    sprite.dialogue_id = Some(rest.to_string());
                 }
                 "POS" => {
-                    let last_line = last_line.replace("POS ", "");
-                    let room_position: Vec<&str> = last_line.split(' ').collect();
+                    let room_position: Vec<&str> = rest.split(' ').collect();
                     sprite.room_id = Some(room_position[0].to_string());
 
                     if room_position.len() < 2 {
@@ -107,10 +106,10 @@ impl FromStr for Sprite {
                     }
                 }
                 "COL" => {
-                    sprite.colour_id = Some(last_line.replace("COL ", "").parse().unwrap());
+                    sprite.colour_id = Some(rest.parse().unwrap());
                 }
                 "ITM" => {
-                    sprite.items.push(last_line.replace("ITM ", ""));
+                    sprite.items.push(rest.to_string());
                 }
                 _ => {
                     lines.push(last_line);
