@@ -106,15 +106,6 @@ impl fmt::Display for Image {
     }
 }
 
-/// todo return Result<(Vec<Image>, Vec<crate::Error>), crate::Error>
-pub fn animation_frames_from_str(str: &str) -> Vec<Image> {
-    str.split('>')
-        .collect::<Vec<&str>>()
-        .iter()
-        .map(|&frame| Image::from_str(frame).unwrap())
-        .collect()
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -141,15 +132,6 @@ mod test {
     fn image_to_string() {
         let output = mock::image::chequers_1().to_string();
         let expected = include_str!("test-resources/image-chequers-1").to_string();
-        assert_eq!(output, expected);
-    }
-
-    #[test]
-    fn test_animation_frames_from_string() {
-        let output = animation_frames_from_str(include_str!("test-resources/animation_frames"));
-
-        let expected = mock::image::animation_frames();
-
         assert_eq!(output, expected);
     }
 

@@ -1,4 +1,3 @@
-use crate::image::animation_frames_from_str;
 use crate::{AnimationFrames, Image, optional_data_line};
 use alloc::string::ToString;
 use alloc::{string::String, vec::Vec};
@@ -32,41 +31,51 @@ impl FromStr for Item {
     type Err = crate::Error;
 
     fn from_str(str: &str) -> Result<Item, Self::Err> {
-        let mut lines: Vec<&str> = str.lines().collect();
-
-        if lines.is_empty() || !lines[0].starts_with("ITM ") {
-            return Err(crate::Error::Item);
+        let mut lines = str.lines();
+        let Some(first_line) = lines.next() else {
+            return Err(crate::Error::Sprite);
+        };
+        if !first_line.starts_with("ITM ") {
+            return Err(crate::Error::Sprite);
         }
 
-        let id = lines[0].replace("ITM ", "");
-        let mut name = None;
-        let mut dialogue_id = None;
-        let mut colour_id: Option<u64> = None;
+        let mut item = Item {
+            id: first_line.replace("ITM ", ""),
+            name: None,
+            dialogue_id: None,
+            colour_id: None,
+            animation_frames: Vec::new(),
+        };
+
+        {
+            let image = Image::from_lines(&mut lines)?;
+            item.animation_frames.push(image);
+        }
 
         loop {
-            let last_line = lines.pop().unwrap();
-
-            if last_line.starts_with("NAME") {
-                name = Some(last_line.replace("NAME ", "").to_string());
-            } else if last_line.starts_with("DLG") {
-                dialogue_id = Some(last_line.replace("DLG ", "").to_string());
-            } else if last_line.starts_with("COL") {
-                colour_id = Some(last_line.replace("COL ", "").parse().unwrap());
-            } else {
-                lines.push(last_line);
+            let Some(line) = lines.next() else {
                 break;
+            };
+            let (first_word, rest) = line.split_once(' ').unwrap_or((line, ""));
+            match first_word {
+                "NAME" => {
+                    item.name = Some(rest.to_string());
+                }
+                "DLG" => {
+                    item.dialogue_id = Some(rest.to_string());
+                }
+                "COL" => {
+                    item.colour_id = Some(rest.parse().unwrap());
+                }
+                ">" => {
+                    let image = Image::from_lines(&mut lines)?;
+                    item.animation_frames.push(image);
+                }
+                _ => {}
             }
         }
 
-        let animation_frames = animation_frames_from_str(&lines[1..].join("\n"));
-
-        Ok(Item {
-            id,
-            name,
-            animation_frames,
-            dialogue_id,
-            colour_id,
-        })
+        Ok(item)
     }
 }
 
