@@ -53,13 +53,7 @@ impl Image {
         self.pixels = pixels;
     }
 
-    fn from_str(str: &str) -> Result<(Image, Vec<crate::Error>), crate::Error> {
-        let mut warnings = Vec::new();
-
-        if str.contains("NaN") {
-            warnings.push(crate::Error::Image);
-        }
-
+    fn from_str(str: &str) -> Result<Image, crate::Error> {
         let string = str.trim().replace("NaN", "0");
         let mut dimension = 0;
         let mut pixels: Vec<u8> = Vec::new();
@@ -81,7 +75,7 @@ impl Image {
         }
 
         if [64, 256].contains(&pixels.len()) {
-            Ok((Image { pixels }, warnings))
+            Ok(Image { pixels })
         } else {
             Err(crate::Error::Image)
         }
@@ -112,7 +106,7 @@ pub fn animation_frames_from_str(str: &str) -> Vec<Image> {
     str.split('>')
         .collect::<Vec<&str>>()
         .iter()
-        .map(|&frame| Image::from_str(frame).unwrap().0)
+        .map(|&frame| Image::from_str(frame).unwrap())
         .collect()
 }
 
@@ -125,7 +119,7 @@ mod test {
 
     #[test]
     fn image_from_string() {
-        let (output, _) = Image::from_str(include_str!("test-resources/image")).unwrap();
+        let output = Image::from_str(include_str!("test-resources/image")).unwrap();
 
         let expected = Image {
             pixels: vec![
@@ -158,7 +152,7 @@ mod test {
     /// check that these extraneous pixels are stripped out
     #[test]
     fn image_out_of_bounds() {
-        let (output, _) = Image::from_str(include_str!("test-resources/image-oob")).unwrap();
+        let output = Image::from_str(include_str!("test-resources/image-oob")).unwrap();
 
         let expected = Image {
             pixels: vec![
