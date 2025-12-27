@@ -1,5 +1,5 @@
 use crate::image::animation_frames_from_str;
-use crate::{optional_data_line, AnimationFrames, Image, Position};
+use crate::{AnimationFrames, Image, Position, optional_data_line};
 use alloc::string::ToString;
 use alloc::{format, string::String, vec::Vec};
 use core::fmt;
@@ -61,65 +61,67 @@ impl FromStr for Sprite {
     type Err = crate::Error;
 
     fn from_str(str: &str) -> Result<Sprite, Self::Err> {
-        let mut lines: Vec<&str> = str.lines().collect();
-
-        if lines.is_empty() || !lines[0].starts_with("SPR ") {
+        let mut lines = str.lines();
+        let Some(first_line) = lines.next() else {
+            return Err(crate::Error::Sprite);
+        };
+        if !first_line.starts_with("SPR ") {
             return Err(crate::Error::Sprite);
         }
 
-        let id = lines[0].replace("SPR ", "");
-        let mut name = None;
-        let mut dialogue_id: Option<String> = None;
-        let mut room_id: Option<String> = None;
-        let mut position: Option<Position> = None;
-        let mut colour_id: Option<u64> = None;
-        let mut items: Vec<String> = Vec::new();
+        let mut sprite = Sprite {
+            id: first_line.replace("SPR ", ""),
+            name: None,
+            dialogue_id: None,
+            room_id: None,
+            position: None,
+            colour_id: None,
+            items: Vec::new(),
+            animation_frames: Vec::new(),
+        };
 
+        let mut lines: Vec<_> = lines.collect();
         loop {
             let last_line = lines.pop().unwrap();
-
-            if last_line.starts_with("NAME") {
-                name = Some(last_line.replace("NAME ", "").to_string());
-            } else if last_line.starts_with("DLG") {
-                dialogue_id = Some(last_line.replace("DLG ", "").to_string());
-            } else if last_line.starts_with("POS") {
-                let last_line = last_line.replace("POS ", "");
-                let room_position: Vec<&str> = last_line.split(' ').collect();
-                room_id = Some(room_position[0].to_string());
-
-                if room_position.len() < 2 {
-                    return Err(crate::Error::Sprite);
+            let (first_word, _) = last_line.split_once(' ').unwrap_or_default();
+            match first_word {
+                "NAME" => {
+                    sprite.name = Some(last_line.replace("NAME ", "").to_string());
                 }
-
-                if let Ok(pos) = Position::from_str(room_position[1]) {
-                    position = Some(pos);
-                } else {
-                    return Err(crate::Error::Sprite);
+                "DLG" => {
+                    sprite.dialogue_id = Some(last_line.replace("DLG ", "").to_string());
                 }
-            } else if last_line.starts_with("COL") {
-                colour_id = Some(last_line.replace("COL ", "").parse().unwrap());
-            } else if last_line.starts_with("ITM") {
-                items.push(last_line.replace("ITM ", ""));
-            } else {
-                lines.push(last_line);
-                break;
+                "POS" => {
+                    let last_line = last_line.replace("POS ", "");
+                    let room_position: Vec<&str> = last_line.split(' ').collect();
+                    sprite.room_id = Some(room_position[0].to_string());
+
+                    if room_position.len() < 2 {
+                        return Err(crate::Error::Sprite);
+                    }
+
+                    if let Ok(pos) = Position::from_str(room_position[1]) {
+                        sprite.position = Some(pos);
+                    } else {
+                        return Err(crate::Error::Sprite);
+                    }
+                }
+                "COL" => {
+                    sprite.colour_id = Some(last_line.replace("COL ", "").parse().unwrap());
+                }
+                "ITM" => {
+                    sprite.items.push(last_line.replace("ITM ", ""));
+                }
+                _ => {
+                    lines.push(last_line);
+                    break;
+                }
             }
         }
 
-        items.reverse();
-
-        let animation_frames = animation_frames_from_str(&lines[1..].join("\n"));
-
-        Ok(Sprite {
-            id,
-            name,
-            animation_frames,
-            dialogue_id,
-            room_id,
-            position,
-            colour_id,
-            items,
-        })
+        sprite.items.reverse();
+        sprite.animation_frames = animation_frames_from_str(&lines.join("\n"));
+        Ok(sprite)
     }
 }
 
