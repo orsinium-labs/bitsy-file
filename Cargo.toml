@@ -1,6 +1,6 @@
 [package]
 name = "bitsy-file"
-version = "0.712.0"
+version = "0.712.1"
 authors = [
     # current maintainer of the fork
     "Gram <git@orsinium.dev>",

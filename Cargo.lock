@@ -4,4 +4,4 @@ version = 4
 
 [[package]]
 name = "bitsy-file"
-version = "0.712.0"
+version = "0.712.1"
