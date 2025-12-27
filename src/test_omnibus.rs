@@ -5,7 +5,7 @@ mod test {
 
     /// bitsy-parser will parse these games correctly
     /// but the output does not match the input, due to game data errors.
-    const ACCEPTED_FAILURES: [&str; 32] = [
+    const EXPECTED_FAILURES: &[&str] = &[
         // position out of bounds e.g. "5, -1"
         "CFE62F11", // "SweetPea Village",
         "013B3CDE", // "Sunset Shore",
@@ -51,14 +51,15 @@ mod test {
         let result = Game::from(s);
         assert!(result.is_ok());
         let game = result.expect("failed to parse game");
-        if ACCEPTED_FAILURES.contains(&id) {
-            return;
+        let actual = game.to_string();
+        let actual = actual.trim_matches('\n');
+        let expected = s.to_string();
+        let expected = expected.trim_matches('\n');
+        if EXPECTED_FAILURES.contains(&id) {
+            assert!(actual != expected);
+        } else {
+            assert_eq!(actual, expected, "output does not match input");
         }
-        assert_eq!(
-            game.to_string().trim_matches('\n'),
-            s.to_string().trim_matches('\n'),
-            "output does not match input"
-        );
     }
 
     #[test]
